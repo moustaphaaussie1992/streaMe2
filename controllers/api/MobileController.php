@@ -1459,7 +1459,7 @@ FROM users
             $myNotificationModel->reciever_id = $userRoomOwner->id;
             $myNotificationModel->description = Constants::$COMMENTED_ON_YOUR_POST;
             $myNotificationModel->save();
-
+            $commentsUsersIds = [];
             if ($userRoomOwner->id != $userId) {
                 $commentsUsersIds = Comment::find()
                         ->select("DISTINCT(users.id)")
