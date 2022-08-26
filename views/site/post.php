@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 
 <!--<a href="-->
 <?php
-//                Url::to(['/site/post', 'postId' => $room["id"]]) 
+//                Url::to(['/site/post', 'postId' => $room["id"]])
 ?>
 <!--">view post</a>-->
 <?php
@@ -594,7 +594,7 @@ if ($room["type"] == "text") {
                                     <filter id="Path_124" x="0" y="0" width="59" height="59" filterUnits="userSpaceOnUse">
                                         <feOffset dy="3" input="SourceAlpha"/>
                                         <feGaussianBlur stdDeviation="5" result="blur"/>
-                                        <feFlood flood-opacity="0.212"/>    
+                                        <feFlood flood-opacity="0.212"/>
                                         <feComposite operator="in" in2="blur"/>
                                         <feComposite in="SourceGraphic"/>
                                     </filter>
@@ -674,141 +674,149 @@ if ($room["type"] == "text") {
     }
     Pjax::end();
     ?>
-
-    <div style="margin-bottom: 10px;">
-        <input id="commentText" class="form-control" placeholder="Comment" style="width: 83%;float: left;margin: 3px;" /> 
-        <button id="snedComment"
-                class="button button1" style="  background-color: #04AA6D; /* Green */
-                border: none;
-                color: white;
-                width: 14%;
-                background: linear-gradient(184deg, rgba(127,71,221,1) 45%, rgba(47,15,101,1) 100%, rgba(218,238,225,1) 100%);
-                height: 30px;
-                text-align: center;
-                text-decoration: none;
-                font-size: 16px;
-                margin-top: 3px;
-                cursor: pointer;border-radius: 20px;
-                " id="6">Send                </button>
-    </div>
+    <?php
+    if (Yii::$app->getUser()->id != null) {
+        ?>
+        }
+        <div style="margin-bottom: 10px;">
+            <input id="commentText" class="form-control" placeholder="Comment" style="width: 83%;float: left;margin: 3px;" />
+            <button id="snedComment"
+                    class="button button1" style="  background-color: #04AA6D; /* Green */
+                    border: none;
+                    color: white;
+                    width: 14%;
+                    background: linear-gradient(184deg, rgba(127,71,221,1) 45%, rgba(47,15,101,1) 100%, rgba(218,238,225,1) 100%);
+                    height: 30px;
+                    text-align: center;
+                    text-decoration: none;
+                    font-size: 16px;
+                    margin-top: 3px;
+                    cursor: pointer;border-radius: 20px;
+                    " id="6">Send                </button>
+        </div>
+    <?php } ?>
 </div>
 
 <?php
-JSRegister::begin([
-    'id' => '1'
-]);
+if (Yii::$app->getUser()->id != null) {
+    JSRegister::begin([
+        'id' => '1'
+    ]);
+    ?>
+    <script>
+
+        $("#snedComment").on('click', function () {
+            var commentText = $("#commentText").val();
+            if (commentText && commentText !== "" && commentText !== null) {
+                $.ajax({
+                    url: '<?php echo Url::toRoute("/api/mobile/add-comment") ?>',
+                    type: "POST",
+                    data: {
+                        'postId': '<?= $room['id'] ?>',
+                        'userId': '<?= Yii::$app->getUser()->getId() ?>',
+                        'text': commentText
+                    },
+                    success: function (data) {
+
+                        console.log(data);
+                        if (data == "true") {
+                            $("#commentText").val("");
+                            $.pjax.reload({container: '#pjax-id', async: false});
+                        } else {
+                        }
+                    },
+                    error: function (errormessage) {
+                        console.log("not working");
+
+                    }
+                });
+
+            }
+        });
+
+
+        $(".likeAndUnlike").on("click", function () {
+            if ($(this).hasClass("likeBtn")) {
+                var likeBtnTemp = $(this);
+                var posrId = $(this).attr('id');
+                $.ajax({
+                    url: '<?php echo Url::toRoute("/api/mobile/follow") ?>',
+                    type: "POST",
+                    data: {
+                        'r_room': posrId,
+                        'r_user': '<?= Yii::$app->getUser()->getId() ?>',
+                        'token': '<?= Yii::$app->user->identity["token"] ?>'
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        if (data == true) {
+                            likeBtnTemp.removeClass("likeBtn");
+                            likeBtnTemp.addClass("unlikeBtn");
+                            likeBtnTemp.html('<defs>\
+                                    <filter id="Ellipse_18" x="0" y="0" width="59" height="59" filterUnits="userSpaceOnUse">\
+                                        <feOffset dy="3" input="SourceAlpha"/>\
+                                        <feGaussianBlur stdDeviation="5" result="blur"/>\
+                                        <feFlood flood-opacity="0.212"/>\
+                                        <feComposite operator="in" in2="blur"/>\
+                                        <feComposite in="SourceGraphic"/>\
+                                    </filter>\
+                                </defs>\
+                                <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Ellipse_18)">\
+                                    <circle id="Ellipse_18-2" data-name="Ellipse 18" cx="14.5" cy="14.5" r="14.5" transform="translate(15 12)" fill="#f15a24"/>\
+                                </g>\
+                                <path id="Union_1" data-name="Union 1" d="M5.555,10.271C2.868,8.591,0,6.575,0,3.907,0,1.342,1.674,0,3.327,0A3.2,3.2,0,0,1,5.866,1.269,3.2,3.2,0,0,1,8.4,0c1.653,0,3.327,1.342,3.327,3.907,0,2.668-2.867,4.684-5.555,6.363a.587.587,0,0,1-.621,0Z" transform="translate(24.018 21.239)" fill="#fff"/>');
+                        } else {
+                        }
+                    },
+                    error: function (errormessage) {
+                        console.log("not working");
+                    }
+                });
+            } else if ($(this).hasClass("unlikeBtn")) {
+                var likeBtnTemp = $(this);
+                var posrId = $(this).attr('id');
+                $.ajax({
+                    url: '<?php echo Url::toRoute("/api/mobile/unfollow") ?>',
+                    type: "POST",
+                    data: {
+                        'r_room': posrId,
+                        'r_user': '<?= Yii::$app->getUser()->getId() ?>',
+                        'token': '<?= Yii::$app->user->identity["token"] ?>'
+                    },
+                    success: function (data) {
+
+                        console.log(data);
+                        if (data == true) {
+                            likeBtnTemp.removeClass("unlikeBtn");
+                            likeBtnTemp.addClass("likeBtn");
+                            likeBtnTemp.html('<defs>\
+                                    <filter id="Path_124" x="0" y="0" width="59" height="59" filterUnits="userSpaceOnUse">\
+                                        <feOffset dy="3" input="SourceAlpha"/>\
+                                        <feGaussianBlur stdDeviation="5" result="blur"/>\
+                                        <feFlood flood-opacity="0.212"/>\
+                                        <feComposite operator="in" in2="blur"/>\
+                                        <feComposite in="SourceGraphic"/>\
+                                    </filter>\
+                                </defs>\
+                                <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Path_124)">\
+                                    <path id="Path_124-2" data-name="Path 124" d="M14.5,0A14.5,14.5,0,1,1,0,14.5,14.5,14.5,0,0,1,14.5,0Z" transform="translate(15 12)" fill="#f15a24"/>\
+                                </g>\
+                                <path id="Union_1" data-name="Union 1" d="M5.555,10.271C2.867,8.59,0,6.575,0,3.908,0,1.342,1.674,0,3.327,0A3.2,3.2,0,0,1,5.865,1.269,3.2,3.2,0,0,1,8.4,0c1.653,0,3.326,1.342,3.326,3.908,0,2.668-2.866,4.683-5.554,6.363a.587.587,0,0,1-.622,0ZM1.173,3.908c0,2.114,2.9,4.044,4.693,5.173,1.8-1.129,4.693-3.059,4.693-5.173,0-1.879-1.117-2.735-2.154-2.735A2.162,2.162,0,0,0,6.41,2.659a.587.587,0,0,1-1.089,0A2.161,2.161,0,0,0,3.327,1.173C2.29,1.173,1.173,2.029,1.173,3.908Z" transform="translate(24.018 21.239)" fill="#fff"/>')
+                        } else {
+                        }
+                    },
+                    error: function (errormessage) {
+                        console.log("not working");
+                    }
+                });
+            }
+        });
+
+
+
+    </script>
+
+    <?php
+    JSRegister::end();
+}
 ?>
-<script>
-
-    $("#snedComment").on('click', function () {
-        var commentText = $("#commentText").val();
-        if (commentText && commentText !== "" && commentText !== null) {
-            $.ajax({
-                url: '<?php echo Url::toRoute("/api/mobile/add-comment") ?>',
-                type: "POST",
-                data: {
-                    'postId': '<?= $room['id'] ?>',
-                    'userId': '<?= Yii::$app->getUser()->getId() ?>',
-                    'text': commentText
-                },
-                success: function (data) {
-
-                    console.log(data);
-                    if (data == "true") {
-                        $("#commentText").val("");
-                        $.pjax.reload({container: '#pjax-id', async: false});
-                    } else {
-                    }
-                },
-                error: function (errormessage) {
-                    console.log("not working");
-
-                }
-            });
-
-        }
-    });
-
-
-    $(".likeAndUnlike").on("click", function () {
-        if ($(this).hasClass("likeBtn")) {
-            var likeBtnTemp = $(this);
-            var posrId = $(this).attr('id');
-            $.ajax({
-                url: '<?php echo Url::toRoute("/api/mobile/follow") ?>',
-                type: "POST",
-                data: {
-                    'r_room': posrId,
-                    'r_user': '<?= Yii::$app->getUser()->getId() ?>',
-                    'token': '<?= Yii::$app->user->identity["token"] ?>'
-                },
-                success: function (data) {
-                    console.log(data);
-                    if (data == true) {
-                        likeBtnTemp.removeClass("likeBtn");
-                        likeBtnTemp.addClass("unlikeBtn");
-                        likeBtnTemp.html('<defs>\
-                                <filter id="Ellipse_18" x="0" y="0" width="59" height="59" filterUnits="userSpaceOnUse">\
-                                    <feOffset dy="3" input="SourceAlpha"/>\
-                                    <feGaussianBlur stdDeviation="5" result="blur"/>\
-                                    <feFlood flood-opacity="0.212"/>\
-                                    <feComposite operator="in" in2="blur"/>\
-                                    <feComposite in="SourceGraphic"/>\
-                                </filter>\
-                            </defs>\
-                            <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Ellipse_18)">\
-                                <circle id="Ellipse_18-2" data-name="Ellipse 18" cx="14.5" cy="14.5" r="14.5" transform="translate(15 12)" fill="#f15a24"/>\
-                            </g>\
-                            <path id="Union_1" data-name="Union 1" d="M5.555,10.271C2.868,8.591,0,6.575,0,3.907,0,1.342,1.674,0,3.327,0A3.2,3.2,0,0,1,5.866,1.269,3.2,3.2,0,0,1,8.4,0c1.653,0,3.327,1.342,3.327,3.907,0,2.668-2.867,4.684-5.555,6.363a.587.587,0,0,1-.621,0Z" transform="translate(24.018 21.239)" fill="#fff"/>');
-                    } else {
-                    }
-                },
-                error: function (errormessage) {
-                    console.log("not working");
-                }
-            });
-        } else if ($(this).hasClass("unlikeBtn")) {
-            var likeBtnTemp = $(this);
-            var posrId = $(this).attr('id');
-            $.ajax({
-                url: '<?php echo Url::toRoute("/api/mobile/unfollow") ?>',
-                type: "POST",
-                data: {
-                    'r_room': posrId,
-                    'r_user': '<?= Yii::$app->getUser()->getId() ?>',
-                    'token': '<?= Yii::$app->user->identity["token"] ?>'
-                },
-                success: function (data) {
-
-                    console.log(data);
-                    if (data == true) {
-                        likeBtnTemp.removeClass("unlikeBtn");
-                        likeBtnTemp.addClass("likeBtn");
-                        likeBtnTemp.html('<defs>\
-                                <filter id="Path_124" x="0" y="0" width="59" height="59" filterUnits="userSpaceOnUse">\
-                                    <feOffset dy="3" input="SourceAlpha"/>\
-                                    <feGaussianBlur stdDeviation="5" result="blur"/>\
-                                    <feFlood flood-opacity="0.212"/>\
-                                    <feComposite operator="in" in2="blur"/>\
-                                    <feComposite in="SourceGraphic"/>\
-                                </filter>\
-                            </defs>\
-                            <g transform="matrix(1, 0, 0, 1, 0, 0)" filter="url(#Path_124)">\
-                                <path id="Path_124-2" data-name="Path 124" d="M14.5,0A14.5,14.5,0,1,1,0,14.5,14.5,14.5,0,0,1,14.5,0Z" transform="translate(15 12)" fill="#f15a24"/>\
-                            </g>\
-                            <path id="Union_1" data-name="Union 1" d="M5.555,10.271C2.867,8.59,0,6.575,0,3.908,0,1.342,1.674,0,3.327,0A3.2,3.2,0,0,1,5.865,1.269,3.2,3.2,0,0,1,8.4,0c1.653,0,3.326,1.342,3.326,3.908,0,2.668-2.866,4.683-5.554,6.363a.587.587,0,0,1-.622,0ZM1.173,3.908c0,2.114,2.9,4.044,4.693,5.173,1.8-1.129,4.693-3.059,4.693-5.173,0-1.879-1.117-2.735-2.154-2.735A2.162,2.162,0,0,0,6.41,2.659a.587.587,0,0,1-1.089,0A2.161,2.161,0,0,0,3.327,1.173C2.29,1.173,1.173,2.029,1.173,3.908Z" transform="translate(24.018 21.239)" fill="#fff"/>')
-                    } else {
-                    }
-                },
-                error: function (errormessage) {
-                    console.log("not working");
-                }
-            });
-        }
-    });
-
-
-
-</script>
-
-<?php JSRegister::end(); ?>
