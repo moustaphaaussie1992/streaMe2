@@ -22,9 +22,9 @@ $this->title = Yii::t('app', 'Posts');
     <h2 class="pull-left"><?= Html::encode($this->title) ?></h2>
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);  ?>
-    <?=
-    Html::a(Yii::t('app', 'Create Rooms'), ['create'], ['class' => 'btn btn-success pull-right',
-        'style' => 'margin-top: 15px; background: linear-gradient(184deg, rgba(127,71,221,1) 45%, rgba(47,15,101,1) 100%, rgba(218,238,225,1) 100%);'])
+    <?php
+//    echo Html::a(Yii::t('app', 'Create Rooms'), ['create'], ['class' => 'btn btn-success pull-right',
+//        'style' => 'margin-top: 15px; background: linear-gradient(184deg, rgba(127,71,221,1) 45%, rgba(47,15,101,1) 100%, rgba(218,238,225,1) 100%);'])
     ?>
     <?=
     GridView::widget([
@@ -61,6 +61,7 @@ $this->title = Yii::t('app', 'Posts');
             ['class' => 'yii\grid\ActionColumn',
                 'contentOptions' => ['style' => 'width: 8.7%'],
                 'visible' => Yii::$app->user->isGuest ? false : true,
+                'template' => '{view} {delete}',
                 'buttons' => [
                     'view' => function ($url, $model) {
                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
@@ -68,13 +69,13 @@ $this->title = Yii::t('app', 'Posts');
                                     'style' => 'padding: 4px;'
                         ]);
                     },
-                    'update' => function ($url, $model) {
-                        return Html::a('<span class="glyphicon glyphicon-pencil "></span>', $url, [
-                                    'class' => 'btn btn-primary btn-xs my-ajax',
-                                    'style' => ' background-color: #20507B;padding: 4px;',
-                                    'title' => 'تعديل'
-                        ]);
-                    },
+//                    'update' => function ($url, $model) {
+//                        return Html::a('<span class="glyphicon glyphicon-pencil "></span>', $url, [
+//                                    'class' => 'btn btn-primary btn-xs my-ajax',
+//                                    'style' => ' background-color: #20507B;padding: 4px;',
+//                                    'title' => 'تعديل'
+//                        ]);
+//                    },
                     'delete' => function ($url, $model) {
                         return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
                                     'class' => 'btn btn-danger btn-xs',
