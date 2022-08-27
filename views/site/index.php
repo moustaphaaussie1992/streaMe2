@@ -24,7 +24,7 @@ for ($i = 0; $i < sizeof($rooms); $i++) {
 
     <!--<a href="-->
     <?php
-//                Url::to(['/site/post', 'postId' => $rooms[$i]["id"]]) 
+//                Url::to(['/site/post', 'postId' => $rooms[$i]["id"]])
     ?>
     <!--">view post</a>-->
     <?php
@@ -37,17 +37,17 @@ for ($i = 0; $i < sizeof($rooms); $i++) {
             <div
                 style="margin-top: 10px;margin-bottom: 10px; margin-left: 10px;
                 ">
-                  <a href="<?= Url::to(['/site/visit-profile', 'userId' => $rooms[$i]["r_admin"]]) ?>">
-                <div style="display:inline-block;vertical-align:top;">
-                    <img
-                        width="50"
-                        height="50"
-                        class="rounded-circle"
-                        style="border-radius: 50%;"
-                        src="<?= "http://" . Yii::$app->params['domain'] . "/profilePicture/" . $rooms[$i]["profile_picture"] ?>"
-                        />
-                </div>
-                  </a>
+                <a href="<?= Url::to(['/site/visit-profile', 'userId' => $rooms[$i]["r_admin"]]) ?>">
+                    <div style="display:inline-block;vertical-align:top;">
+                        <img
+                            width="50"
+                            height="50"
+                            class="rounded-circle"
+                            style="border-radius: 50%;"
+                            src="<?= "http://" . Yii::$app->params['domain'] . "/profilePicture/" . $rooms[$i]["profile_picture"] ?>"
+                            />
+                    </div>
+                </a>
                 <div style="display:inline-block;">
                     <div style="padding: 0px;"><span style="font-weight: bold; font-size: 14px;"><?= $rooms[$i]["fullname"] ?></span></div>
                     <div style="font-size: 14px;font-family:'Myriad Pro Regular';"><?= $rooms[$i]["challenge_coins"] ?></div>
@@ -231,19 +231,19 @@ for ($i = 0; $i < sizeof($rooms); $i++) {
 
             <div
                 style="margin-top: 10px;margin-bottom: 10px; margin-left: 10px;
-                
+
                 ">
-                 <a href="<?= Url::to(['/site/visit-profile', 'userId' => $rooms[$i]["r_admin"]]) ?>">
-                <div style="display:inline-block;vertical-align:top;">
-                    <img
-                        style="border-radius: 50%;"
-                        width="50"
-                        height="50"
-                        class="rounded-circle"
-                        src="<?= "http://" . Yii::$app->params['domain'] . "/profilePicture/" . $rooms[$i]["profile_picture"] ?>"
-                        />
-                </div>
-                 </a>
+                <a href="<?= Url::to(['/site/visit-profile', 'userId' => $rooms[$i]["r_admin"]]) ?>">
+                    <div style="display:inline-block;vertical-align:top;">
+                        <img
+                            style="border-radius: 50%;"
+                            width="50"
+                            height="50"
+                            class="rounded-circle"
+                            src="<?= "http://" . Yii::$app->params['domain'] . "/profilePicture/" . $rooms[$i]["profile_picture"] ?>"
+                            />
+                    </div>
+                </a>
                 <div style="display:inline-block;">
                     <div style="padding: 0px;"><span style="font-weight: bold;font-family:'Myriad Pro Regular'; font-size: 14px;"><?= $rooms[$i]["fullname"] ?></span></div>
                     <div style="font-size: 14px;font-family:'Myriad Pro Regular';"></div>
@@ -424,17 +424,17 @@ for ($i = 0; $i < sizeof($rooms); $i++) {
                 <div
                     style="margin-top: 10px;margin-bottom: 10px; margin-left: 10px;
                     ">
-                      <a href="<?= Url::to(['/site/visit-profile', 'userId' => $rooms[$i]["r_admin"]]) ?>">
-                    <div style="display:inline-block;vertical-align:top;">
-                        <img
-                            style="border-radius: 50%;"
-                            width="50"
-                            height="50"
-                            class="rounded-circle"
-                            src="<?= "http://" . Yii::$app->params['domain'] . "/profilePicture/" . $rooms[$i]["profile_picture"] ?>"
-                            />
-                    </div>
-                      </a>
+                    <a href="<?= Url::to(['/site/visit-profile', 'userId' => $rooms[$i]["r_admin"]]) ?>">
+                        <div style="display:inline-block;vertical-align:top;">
+                            <img
+                                style="border-radius: 50%;"
+                                width="50"
+                                height="50"
+                                class="rounded-circle"
+                                src="<?= "http://" . Yii::$app->params['domain'] . "/profilePicture/" . $rooms[$i]["profile_picture"] ?>"
+                                />
+                        </div>
+                    </a>
                     <div style="display:inline-block;">
                         <div style="padding: 0px;"><span style="font-weight: bold;font-family:'Myriad Pro Regular'; font-size: 14px;"><?= $rooms[$i]["fullname"] ?></span></div>
                         <div style="font-size: 14px;font-family:'Myriad Pro Bold';"><?= $rooms[$i]["challenge_coins"] ?></div>
@@ -596,17 +596,17 @@ for ($i = 0; $i < sizeof($rooms); $i++) {
                 <div
                     style="margin-top: 10px;margin-bottom: 10px; margin-left: 10px;
                     ">
-                      <a href="<?= Url::to(['/site/visit-profile', 'userId' => $rooms[$i]["r_admin"]]) ?>">
-                    <div style="display:inline-block;vertical-align:top;">
-                        <img
-                            style="border-radius: 50%;"
-                            width="50"
-                            height="50"
-                            class="rounded-circle"
-                            src="<?= "http://" . Yii::$app->params['domain'] . "/profilePicture/" . $rooms[$i]["profile_picture"] ?>"
-                            />
-                    </div>
-                      </a>
+                    <a href="<?= Url::to(['/site/visit-profile', 'userId' => $rooms[$i]["r_admin"]]) ?>">
+                        <div style="display:inline-block;vertical-align:top;">
+                            <img
+                                style="border-radius: 50%;"
+                                width="50"
+                                height="50"
+                                class="rounded-circle"
+                                src="<?= "http://" . Yii::$app->params['domain'] . "/profilePicture/" . $rooms[$i]["profile_picture"] ?>"
+                                />
+                        </div>
+                    </a>
                     <div style="display:inline-block;">
                         <div style="padding: 0px;"><span style="font-weight: bold; font-size: 14px;font-family:'Myriad Pro Regular';"><?= $rooms[$i]["fullname"] ?></span></div>
                         <div style="font-size: 14px;font-family:'Myriad Pro Regular';"><?= $rooms[$i]["challenge_coins"] ?></div>
@@ -792,31 +792,30 @@ for ($i = 0; $i < sizeof($rooms); $i++) {
 </div>
 
 <?php
-JSRegister::begin([
-    'id' => '1'
-]);
-?>
-<script>
-    $(".likeAndUnlike").on("click", function () {
-        if ($(this).hasClass("likeBtn")) {
-            var likeBtnTemp = $(this);
-            var posrId = $(this).attr('id');
-            $.ajax({
-                url: '<?php echo Url::toRoute("/api/mobile/follow") ?>',
-                type: "POST",
-                data: {
-                    'r_room': posrId,
-                    'r_user': '<?= Yii::$app->getUser()->getId() ?>',
-                    'token': ''
-                   
-                    <?php // Yii::$app->user->identity["token"] ?>
-                },
-                success: function (data) {
-                    console.log(data);
-                    if (data == true) {
-                        likeBtnTemp.removeClass("likeBtn");
-                        likeBtnTemp.addClass("unlikeBtn");
-                        likeBtnTemp.html('<defs>\
+if (Yii::$app->getUser()->id != null) {
+    JSRegister::begin([
+        'id' => '1'
+    ]);
+    ?>
+    <script>
+        $(".likeAndUnlike").on("click", function () {
+            if ($(this).hasClass("likeBtn")) {
+                var likeBtnTemp = $(this);
+                var posrId = $(this).attr('id');
+                $.ajax({
+                    url: '<?php echo Url::toRoute("/api/mobile/follow") ?>',
+                    type: "POST",
+                    data: {
+                        'r_room': posrId,
+                        'r_user': '<?= Yii::$app->getUser()->getId() ?>',
+                        'token': '<?= Yii::$app->user->identity["token"] ?>'
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        if (data == true) {
+                            likeBtnTemp.removeClass("likeBtn");
+                            likeBtnTemp.addClass("unlikeBtn");
+                            likeBtnTemp.html('<defs>\
                                 <filter id="Ellipse_18" x="0" y="0" width="59" height="59" filterUnits="userSpaceOnUse">\
                                     <feOffset dy="3" input="SourceAlpha"/>\
                                     <feGaussianBlur stdDeviation="5" result="blur"/>\
@@ -829,31 +828,31 @@ JSRegister::begin([
                                 <circle id="Ellipse_18-2" data-name="Ellipse 18" cx="14.5" cy="14.5" r="14.5" transform="translate(15 12)" fill="#f15a24"/>\
                             </g>\
                             <path id="Union_1" data-name="Union 1" d="M5.555,10.271C2.868,8.591,0,6.575,0,3.907,0,1.342,1.674,0,3.327,0A3.2,3.2,0,0,1,5.866,1.269,3.2,3.2,0,0,1,8.4,0c1.653,0,3.327,1.342,3.327,3.907,0,2.668-2.867,4.684-5.555,6.363a.587.587,0,0,1-.621,0Z" transform="translate(24.018 21.239)" fill="#fff"/>');
-                    } else {
+                        } else {
+                        }
+                    },
+                    error: function (errormessage) {
+                        console.log("not working");
                     }
-                },
-                error: function (errormessage) {
-                    console.log("not working");
-                }
-            });
-        } else if ($(this).hasClass("unlikeBtn")) {
-            var likeBtnTemp = $(this);
-            var posrId = $(this).attr('id');
-            $.ajax({
-                url: '<?php echo Url::toRoute("/api/mobile/unfollow") ?>',
-                type: "POST",
-                data: {
-                    'r_room': posrId,
-                    'r_user': '<?= Yii::$app->getUser()->getId() ?>',
-                    'token': ''
-                },
-                success: function (data) {
+                });
+            } else if ($(this).hasClass("unlikeBtn")) {
+                var likeBtnTemp = $(this);
+                var posrId = $(this).attr('id');
+                $.ajax({
+                    url: '<?php echo Url::toRoute("/api/mobile/unfollow") ?>',
+                    type: "POST",
+                    data: {
+                        'r_room': posrId,
+                        'r_user': '<?= Yii::$app->getUser()->getId() ?>',
+                        'token': '<?= Yii::$app->user->identity["token"] ?>'
+                    },
+                    success: function (data) {
 
-                    console.log(data);
-                    if (data == true) {
-                        likeBtnTemp.removeClass("unlikeBtn");
-                        likeBtnTemp.addClass("likeBtn");
-                        likeBtnTemp.html('<defs>\
+                        console.log(data);
+                        if (data == true) {
+                            likeBtnTemp.removeClass("unlikeBtn");
+                            likeBtnTemp.addClass("likeBtn");
+                            likeBtnTemp.html('<defs>\
                                 <filter id="Path_124" x="0" y="0" width="59" height="59" filterUnits="userSpaceOnUse">\
                                     <feOffset dy="3" input="SourceAlpha"/>\
                                     <feGaussianBlur stdDeviation="5" result="blur"/>\
@@ -866,20 +865,23 @@ JSRegister::begin([
                                 <path id="Path_124-2" data-name="Path 124" d="M14.5,0A14.5,14.5,0,1,1,0,14.5,14.5,14.5,0,0,1,14.5,0Z" transform="translate(15 12)" fill="#f15a24"/>\
                             </g>\
                             <path id="Union_1" data-name="Union 1" d="M5.555,10.271C2.867,8.59,0,6.575,0,3.908,0,1.342,1.674,0,3.327,0A3.2,3.2,0,0,1,5.865,1.269,3.2,3.2,0,0,1,8.4,0c1.653,0,3.326,1.342,3.326,3.908,0,2.668-2.866,4.683-5.554,6.363a.587.587,0,0,1-.622,0ZM1.173,3.908c0,2.114,2.9,4.044,4.693,5.173,1.8-1.129,4.693-3.059,4.693-5.173,0-1.879-1.117-2.735-2.154-2.735A2.162,2.162,0,0,0,6.41,2.659a.587.587,0,0,1-1.089,0A2.161,2.161,0,0,0,3.327,1.173C2.29,1.173,1.173,2.029,1.173,3.908Z" transform="translate(24.018 21.239)" fill="#fff"/>')
-                    } else {
+                        } else {
+                        }
+                    },
+                    error: function (errormessage) {
+                        console.log("not working");
                     }
-                },
-                error: function (errormessage) {
-                    console.log("not working");
-                }
-            });
-        }
-    });
+                });
+            }
+        });
 
 
 
 
-</script>
+    </script>
 
-<?php JSRegister::end(); ?>
+    <?php
+    JSRegister::end();
+}
+?>
 

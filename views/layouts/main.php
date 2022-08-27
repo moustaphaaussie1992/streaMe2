@@ -5,6 +5,7 @@
 use app\assets\AppAsset;
 use app\widgets\Alert;
 use lo\widgets\modal\ModalAjax;
+use mdm\admin\components\MenuHelper;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\helpers\Html;
@@ -78,6 +79,11 @@ echo ModalAjax::widget([
                 'class' => 'navbar-fixed-top navbar navbar-expand-md navbar-dark bg-dark fixed-top',
                 'style' => "background: rgb(127,71,221);background: linear-gradient(184deg, rgba(127,71,221,1) 45%, rgba(47,15,101,1) 100%, rgba(218,238,225,1) 100%)"
             ],
+        ]);
+        echo
+        Nav::widget([
+            'options' => ['class' => 'navbar-nav pull-left'],
+            'items' => MenuHelper::getAssignedMenu(Yii::$app->user->id)
         ]);
         echo
         Nav::widget([

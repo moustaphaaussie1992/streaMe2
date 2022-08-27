@@ -4,7 +4,7 @@ $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
 $config = [
-    'id' => 'basic',
+    'id' => 'streaMe2',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log', 'languagepicker'],
     'aliases' => [
@@ -14,7 +14,7 @@ $config = [
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '2Fn3R6oO3Dw0mXYfbLAZwWo9Ikp1k55C',
+            'cookieValidationKey' => '2Fn3R6oO3Dw0mXYfbLAZwWo9Ikp1k55C43523454',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -48,7 +48,7 @@ $config = [
             // Disable index.php
             'showScriptName' => false,
             // Disable r= routes
-            'enablePrettyUrl' => false,
+            'enablePrettyUrl' => true,
             'rules' => [
                 '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
@@ -134,12 +134,12 @@ $config = [
     'as access' => [
         'class' => 'mdm\admin\components\AccessControl',
         'allowActions' => [
-            '*',
+//            '*',
             'site/login',
             'site/logout',
             'site/error',
             'site/index',
-//            'admin/*'     
+//            'admin/*'
         ]
     ],
     'timeZone' => 'Asia/Beirut',
