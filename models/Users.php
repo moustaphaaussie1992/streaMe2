@@ -47,6 +47,7 @@ class Users extends BaseUsers {
 
     const ROLE_ADMIN = 'Administrator';
     const ROLE_SUPERVISOR = 'Supervisor';
+    const ROLE_USER = 'user';
 
     public $role;
 
@@ -64,8 +65,8 @@ class Users extends BaseUsers {
         return [
             [['fullname', 'password', 'username'], 'required'],
             [['password'], 'string'],
-            [['role', 'is_approved','role'], 'integer'],
-            [['fullname', 'link_facebook', 'link_youtube', 'link_instagram', 'link_tiktok','tags','bio'], 'string', 'max' => 200],
+            [['role', 'is_approved', 'role'], 'integer'],
+            [['fullname', 'link_facebook', 'link_youtube', 'link_instagram', 'link_tiktok', 'tags', 'bio'], 'string', 'max' => 200],
             [['username'], 'string', 'max' => 100],
             [['token'], 'string', 'max' => 300],
             [['profile_picture'], 'string', 'max' => 2000],
@@ -146,6 +147,21 @@ class Users extends BaseUsers {
 
 
         if (isset($model) && isset($model[0]) && $model[0]['role'] == Users::ROLE_ADMIN) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function isUserRole() {
+        $model = Users::find()
+                        ->select('user.*,auth_item.name as role')
+                        ->leftJoin('auth_assignment', 'auth_assignment.user_id=user.id')
+                        ->leftJoin('auth_item', 'auth_item.name = auth_assignment.item_name')
+                        ->where(['auth_item.type' => 1,
+                            'user.id' => Yii::$app->user->id])->asArray()->all();
+
+
+        if (isset($model) && isset($model[0]) && $model[0]['role'] == Users::ROLE_USER) {
             return true;
         }
         return false;

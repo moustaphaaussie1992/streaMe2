@@ -44,6 +44,7 @@ class RoomsSearch extends Rooms {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> false
         ]);
 
         $this->load($params);
@@ -81,6 +82,8 @@ class RoomsSearch extends Rooms {
                 ->andFilterWhere(['like', 'color1', $this->color1])
                 ->andFilterWhere(['like', 'color2', $this->color2])
                 ->andFilterWhere(['like', 'video_thumbnail', $this->video_thumbnail]);
+        
+        $query->orderBy("creation_date DESC");
 
         return $dataProvider;
     }
