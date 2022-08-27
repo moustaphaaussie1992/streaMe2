@@ -807,7 +807,9 @@ JSRegister::begin([
                 data: {
                     'r_room': posrId,
                     'r_user': '<?= Yii::$app->getUser()->getId() ?>',
-                    'token': '<?= Yii::$app->user->identity["token"] ?>'
+                    'token': ''
+                   
+                    <?php // Yii::$app->user->identity["token"] ?>
                 },
                 success: function (data) {
                     console.log(data);
@@ -843,7 +845,7 @@ JSRegister::begin([
                 data: {
                     'r_room': posrId,
                     'r_user': '<?= Yii::$app->getUser()->getId() ?>',
-                    'token': '<?= Yii::$app->user->identity["token"] ?>'
+                    'token': ''
                 },
                 success: function (data) {
 
