@@ -16,7 +16,7 @@ $config = [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => '2Fn3R6oO3Dw0mXYfbLAZwWo9Ikp1k55C43523454',
         ],
-        'cache' => [
+        'cache' => [    
             'class' => 'yii\caching\FileCache',
         ],
         'user' => [
@@ -139,6 +139,7 @@ $config = [
             'site/logout',
             'site/error',
             'site/index',
+            'api/mobile/*',
 //            'admin/*'
         ]
     ],

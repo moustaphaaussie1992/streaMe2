@@ -30,6 +30,7 @@ use function GuzzleHttp\json_decode;
 class MobileController extends ApiController {
 
     public function actionTest() {
+
         $request = Yii::$app->request;
         if ($request->get('access-token') != '--') {
             return ['success' => true, 'test' => 'Hello World!'];
@@ -1298,6 +1299,10 @@ FROM users
 
     public function actionSignup() {
         $post = Yii::$app->request->post();
+        
+//        if(isset($post["fullname"])&&isset($post["password"])&&isset($post["role"])){
+//            
+//        }
 
         $fullname = $post["fullname"];
 
