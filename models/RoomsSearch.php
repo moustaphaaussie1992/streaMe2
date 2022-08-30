@@ -16,8 +16,8 @@ class RoomsSearch extends Rooms {
      */
     public function rules() {
         return [
-            [['id', 'r_admin', 'game', 'mention', 'mention2', 'mention3', 'accept1', 'accept2', 'accept3', 'challenge_coins', 'is_challenge_finished', 'challenge_winner', 'streamer_response', 'invitation_response'], 'integer'],
-            [['title', 'c_text', 'creation_date', 'type', 'category', 'color1', 'color2', 'video_thumbnail', 'challenge_date'], 'safe'],
+            [['id', 'game', 'mention', 'mention2', 'mention3', 'accept1', 'accept2', 'accept3', 'challenge_coins', 'is_challenge_finished', 'challenge_winner', 'streamer_response', 'invitation_response'], 'integer'],
+            [['title', 'r_admin', 'c_text', 'creation_date', 'type', 'category', 'color1', 'color2', 'video_thumbnail', 'challenge_date'], 'safe'],
         ];
     }
 
@@ -36,15 +36,14 @@ class RoomsSearch extends Rooms {
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
-    {
-        $query = Rooms::find();
+    public function search($params) {
+        $query = Rooms::find()->joinWith('rAdmin', false);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> false
+            'sort' => false
         ]);
 
         $this->load($params);
@@ -58,7 +57,7 @@ class RoomsSearch extends Rooms {
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'r_admin' => $this->r_admin,
+//            'r_admin' => $this->r_admin,
             'creation_date' => $this->creation_date,
             'game' => $this->game,
             'mention' => $this->mention,
@@ -77,12 +76,13 @@ class RoomsSearch extends Rooms {
 
         $query->andFilterWhere(['like', 'title', $this->title])
                 ->andFilterWhere(['like', 'c_text', $this->c_text])
+                ->andFilterWhere(['like', 'fullname', $this->r_admin])
                 ->andFilterWhere(['like', 'type', $this->type])
                 ->andFilterWhere(['like', 'category', $this->category])
                 ->andFilterWhere(['like', 'color1', $this->color1])
                 ->andFilterWhere(['like', 'color2', $this->color2])
                 ->andFilterWhere(['like', 'video_thumbnail', $this->video_thumbnail]);
-        
+
         $query->orderBy("creation_date DESC");
 
         return $dataProvider;
