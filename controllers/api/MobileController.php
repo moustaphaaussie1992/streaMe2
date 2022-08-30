@@ -30,6 +30,11 @@ use function GuzzleHttp\json_decode;
 class MobileController extends ApiController {
 
     public function actionTest() {
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            return ['success' => true, 'test' => 'Hello World!'];
+        }
+        return ['success' => false, 'test' => 'Hello World!'];
 
 //        $frame = 10;
 //        $movie = 'test.mp4';
@@ -292,7 +297,7 @@ WHERE challenge_voting.post_id=" . $room->id;
             $creatorUser = Users::findOne(["id" => $user]);
             if ($creatorUser) {
                 if ($creatorUser->coins >= $coins) {
-                    
+
                 } else {
                     return "nocoins";
                 }
@@ -371,7 +376,7 @@ WHERE challenge_voting.post_id=" . $room->id;
 //                    imagejpeg($im, $uploads_dir . $imageName);
                         imagejpeg($thumb, $uploads_dir . $imageName);
 
-                        //save record to database table 
+                        //save record to database table
                         $room = Rooms::findOne(["id" => $room->primaryKey]);
                         $room->video_thumbnail = $imageName;
                         if ($room->save()) {
@@ -425,7 +430,7 @@ WHERE challenge_voting.post_id=" . $room->id;
 //                    imagejpeg($im, $uploads_dir . $imageName);
                         imagejpeg($thumb, $uploads_dir . $imageName);
 
-                        //save record to database table 
+                        //save record to database table
                         $postFiles = new PostFiles();
                         $postFiles->post_id = $room->primaryKey;
                         $postFiles->file_name = $imageName;
@@ -645,7 +650,7 @@ WHERE challenge_voting.post_id=" . $room->id;
 //                    imagejpeg($im, $uploads_dir . $imageName);
                         imagejpeg($thumb, $uploads_dir . $imageName);
 
-                        //save record to database table 
+                        //save record to database table
                         $challenge = ChallengesVideos::findOne(["id" => $challenge->primaryKey]);
                         $challenge->thumbnail = $imageName;
                         if ($challenge->save()) {
@@ -705,13 +710,13 @@ WHERE challenge_voting.post_id=" . $room->id;
             (SELECT COUNT(id) FROM followrooms WHERE r_room = rooms.id) as number_of_likes,
             (SELECT COUNT(id) FROM comment WHERE r_room = rooms.id) as number_of_comments,
             (SELECT c_text FROM comment WHERE r_room = rooms.id ORDER BY id DESC LIMIT 1) as last_comment,
-            
+
 type,
             (SELECT GROUP_CONCAT(file_name SEPARATOR ',') FROM post_files WHERE post_id = rooms.id) as files
              FROM rooms
              JOIN users ON rooms.r_admin = users.id
              LEFT JOIN followrooms ON followrooms.r_room = rooms.id AND followrooms.r_user = $userId
-            
+
              ORDER BY rooms.creation_date DESC;";
         $command = Yii::$app->db->createCommand($sql);
         $arrayList = $command->queryAll();
@@ -732,16 +737,16 @@ type,
             } else if ($item["category"] == "donate") {
 
 //                $arrayList[$i]["challengesVideos"] = null;
-//                
-                $donations = "SELECT  SUM(user_transactions.coins) AS value_sum 
+//
+                $donations = "SELECT  SUM(user_transactions.coins) AS value_sum
 FROM user_transactions
 WHERE roomId =" . $item["id"];
 
                 $command1 = Yii::$app->db->createCommand($donations);
-//              return  $command1->queryOne()["value_sum"]; 
+//              return  $command1->queryOne()["value_sum"];
                 $itemDonate = $command1->queryOne();
                 $arrayList[$i]["number_of_donates"] = $itemDonate["value_sum"];
-//              
+//
             } else {
                 $arrayList[$i]["challengesVideos"] = null;
             }
@@ -752,7 +757,7 @@ WHERE roomId =" . $item["id"];
     }
 
 //     public function actionGetProUsersPosts() {
-//         
+//
 //        \Yii::$app->response->format = Response::FORMAT_JSON;
 //
 //        $post = Yii::$app->request->post();
@@ -773,7 +778,7 @@ WHERE roomId =" . $item["id"];
 //                ->select("pro_user_posts.*,users.fullname,users.profile_picture,
 //                    COUNT(pro_user_posts.id) as count,
 //                    (SELECT COUNT(pro_user_posts_views.id) as count
-//                          FROM pro_user_posts_views 
+//                          FROM pro_user_posts_views
 //                          JOIN pro_user_posts pup ON pup.id = pro_user_posts_views.pro_post_id
 //                          WHERE pro_user_posts_views.user_id = $userId AND pro_user_posts_views.creation_date >= now() - INTERVAL 1 DAY AND pup.user_id = pro_user_posts.user_id
 //                          ORDER BY pro_user_posts_views.creation_date DESC
@@ -892,8 +897,8 @@ WHERE roomId =" . $item["id"];
 
 
 
-        $sql = "   
-             SELECT   users.*, 
+        $sql = "
+             SELECT   users.*,
        (SELECT COUNT(*) FROM follow
         WHERE users.id = follow.r_page) AS followers,follow.r_page as followed
 FROM users
@@ -1119,7 +1124,7 @@ FROM users
                 ->select("pro_user_posts.*,users.fullname,users.profile_picture,
                     COUNT(pro_user_posts.id) as count,
                     (SELECT COUNT(pro_user_posts_views.id) as count
-                          FROM pro_user_posts_views 
+                          FROM pro_user_posts_views
                           JOIN pro_user_posts  pup ON pup.id = pro_user_posts_views.pro_post_id
                           WHERE pro_user_posts_views.user_id = $userId  AND pup.user_id = pro_user_posts.user_id
                           ORDER BY pro_user_posts_views.creation_date DESC) as viewed_count")
@@ -1130,7 +1135,6 @@ FROM users
                 ->groupBy('pro_user_posts.user_id')
                 ->orderBy('creation_date DESC')
                 ->all();
-
 
         $temp_array1 = [];
         $temp_array2 = [];
@@ -1200,7 +1204,7 @@ FROM users
 //                ->select("pro_user_posts.*,users.fullname,users.profile_picture,
 //                    COUNT(pro_user_posts.id) as count,
 //                    (SELECT COUNT(pro_user_posts_views.id) as count
-//                          FROM pro_user_posts_views 
+//                          FROM pro_user_posts_views
 //                          JOIN pro_user_posts  pup ON pup.id = pro_user_posts_views.pro_post_id
 //                          WHERE pro_user_posts_views.user_id = $userId  AND pup.user_id = pro_user_posts.user_id
 //                          ORDER BY pro_user_posts_views.creation_date DESC) as viewed_count")
@@ -1253,12 +1257,12 @@ FROM users
 //                    imagejpeg($im, $uploads_dir . $imageName);
                 imagejpeg($thumb, $uploads_dir . $imageName);
 
-                //save record to database table 
+                //save record to database table
                 $proUserPost = ProUserPosts::findOne(["id" => $proUserPost->primaryKey]);
                 $proUserPost->image = $imageName;
 
                 if ($proUserPost->save()) {
-                    
+
                 }
                 return "true";
             } else {
@@ -1341,7 +1345,7 @@ FROM users
                 $model->game_id = $userGame->id;
                 $model->game_account_id = $userGame->account_game_id;
                 if ($model->save()) {
-                    
+
                 }
             }
 
@@ -1384,7 +1388,6 @@ FROM users
                     'password' => $password,
 //                    'role' => $role
         ]);
-
 
 //        if (Yii::$app->security->validatePassword($password, $user->password_hash)) {
 //        return $user;
@@ -1448,7 +1451,6 @@ FROM users
                     ->asArray()
                     ->column();
             array_push($commentsUsers, $firebaseTokenOfRoomOwner);
-
 
             // add to table notification
 
@@ -1834,7 +1836,7 @@ FROM users
                                     $model->game_id = $userGame->game_id;
                                     $model->game_account_id = $userGame->game_account_id;
                                     if ($model->save()) {
-                                        
+
                                     } else {
                                         return [
                                             "status" => "0",
@@ -1855,7 +1857,7 @@ FROM users
                                 $model->game_id = $userGame->id;
                                 $model->game_account_id = $userGame->game_account_id;
                                 if ($model->save()) {
-                                    
+
                                 } else {
                                     return [
                                         "status" => "0",
@@ -1863,7 +1865,7 @@ FROM users
                                     ];
                                 }
                             } else {
-                                
+
                             }
                         }
                     } else {
@@ -1933,7 +1935,6 @@ FROM users
             $notification->subject = $senderName;
             $notification->message = Constants::$FOLLOWED_YOU;
             $notification->notifyToUserGoToAd([$user->token], 0);
-
 
             return true;
         } else {
@@ -2269,7 +2270,7 @@ FROM users
                 $userPurchace->quantity = $quantity;
                 $userPurchace->acknowledged = $acknowledged;
                 if ($userPurchace->save()) {
-                    
+
                 }
                 return [
                     "status" => "1",
@@ -2320,7 +2321,7 @@ FROM users
 //                $userPurchace->quantity = $quantity;
 //                $userPurchace->acknowledged = $acknowledged;
 //                if ($userPurchace->save()) {
-//                    
+//
 //                }
 //                return [
 //                    "status" => "1",
@@ -2457,12 +2458,10 @@ FROM users
                         $myNotificationModel->description = Constants::$VOTED_FOR_YOU;
                         $myNotificationModel->save();
 
-
                         $notification = new NotificationForm();
                         $notification->subject = $senderName;
                         $notification->message = Constants::$VOTED_FOR_YOU;
                         $notification->notifyToUserGoToAd([$user->token], $postId);
-
 
                         return [
                             'status' => true,

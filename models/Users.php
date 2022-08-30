@@ -71,6 +71,7 @@ class Users extends BaseUsers {
             [['token'], 'string', 'max' => 300],
             [['profile_picture'], 'string', 'max' => 2000],
             [['username'], 'unique'],
+            [['access_token'], 'string', 'max' => 255],
         ];
     }
 
@@ -106,9 +107,9 @@ class Users extends BaseUsers {
         return null;
     }
 
-    public static function findIdentityByAccessToken($token, $type = null) {
-        return self::findOne(['auth_key' => $token]);
-    }
+//    public static function findIdentityByAccessToken($token, $type = null) {
+//        return self::findOne(['auth_key' => $token]);
+//    }
 
     public static function getRoles() {
         return [
@@ -144,7 +145,6 @@ class Users extends BaseUsers {
                         ->leftJoin('auth_item', 'auth_item.name = auth_assignment.item_name')
                         ->where(['auth_item.type' => 1,
                             'user.id' => Yii::$app->user->id])->asArray()->all();
-
 
         if (isset($model) && isset($model[0]) && $model[0]['role'] == Users::ROLE_ADMIN) {
             return true;
@@ -222,4 +222,19 @@ class Users extends BaseUsers {
 //        }
 //        return false;
 //    }
+
+    /**
+     * Finds an identity by the given token.
+     *
+     * @param string $token the token to be looked for
+     * @return IdentityInterface|null the identity object that matches the given token.
+     */
+    public static function findIdentityByAccessToken($token, $type = null) {
+        return static::findOne(['access_token' => $token]);
+    }
+
+    public function generateAccessToken() {
+        $this->access_token = Yii::$app->security->generateRandomString();
+    }
+
 }
