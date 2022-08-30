@@ -2644,4 +2644,73 @@ FROM users
 //            "message" => "marked as unread"
 //        ];
 //    }
+
+    public function actionMakeUserActive() {
+        $post = Yii::$app->request->post();
+        $id = $post["id"];
+
+        $user = Users::findOne(["id" => $id]);
+        if ($user) {
+            $user->status = 10;
+            if ($user->save()) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public function actionMakeUserInactive() {
+        $post = Yii::$app->request->post();
+        $id = $post["id"];
+
+        $user = Users::findOne(["id" => $id]);
+        if ($user) {
+            $user->status = 0;
+            if ($user->save()) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public function actionMakePostActive() {
+        $post = Yii::$app->request->post();
+        $id = $post["id"];
+
+        $user = Rooms::findOne(["id" => $id]);
+        if ($user) {
+            $user->active = 1;
+            if ($user->save()) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public function actionMakePostInactive() {
+        $post = Yii::$app->request->post();
+        $id = $post["id"];
+
+        $user = Rooms::findOne(["id" => $id]);
+        if ($user) {
+            $user->active = 0;
+            if ($user->save()) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
 }
