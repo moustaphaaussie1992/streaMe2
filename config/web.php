@@ -139,6 +139,7 @@ $config = [
             'site/logout',
             'site/error',
             'site/index',
+            'api/mobile/*',
 //            'admin/*'
         ]
     ],

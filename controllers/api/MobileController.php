@@ -8,6 +8,7 @@ use app\models\Comment;
 use app\models\Constants;
 use app\models\Follow;
 use app\models\Followrooms;
+use app\models\LoginForm;
 use app\models\Notificaion;
 use app\models\NotificationForm;
 use app\models\Pageadmin;
@@ -1376,33 +1377,21 @@ FROM users
     }
 
     public function actionLogin() {
+
         $post = Yii::$app->request->post();
+        $model = new LoginForm();
 
-        $password = $post["password"];
-        $username = $post["username"];
-//        $role = $post["role"];
-        $token = $post["token"];
-
-        $user = Users::findOne([
-                    'username' => $username,
-                    'password' => $password,
-//                    'role' => $role
-        ]);
-
-//        if (Yii::$app->security->validatePassword($password, $user->password_hash)) {
-//        return $user;
-
-        if ($user) {
-            $user->token = $token;
-            $user->save();
-
-            return $user;
-        } else {
-            return $user->errors;
+        if (isset($post["username"]) && isset($post["password"]) && isset($post["token"])) {
+            $model->username = $post["username"];
+            $model->password = $post["password"];
+            if ($model->login()) {
+                $user = $model->getUser();
+                $user->generateAccessToken();
+                $user->save();
+                return ['success' => true, 'data' => $user];
+            }
         }
-//        } else {
-//            return "wrong password";
-//        }
+        return ['success' => false, 'message' => "Incorrect username or password"];
     }
 
 //    public function actionLogin2() {
@@ -2547,13 +2536,12 @@ FROM users
         if ($user) {
             $user->token = $token;
             if ($user->save()) {
-                return true;
+                return ['success' => true, 'message' => 'success'];
             } else {
-                return $user->getErrors();
+                return ['success' => false, 'message' => $user->getErrors()];
             }
-        } else {
-            return "no user found";
         }
+        return ['success' => false, 'message' => 'no user found'];
     }
 
 //    public function actionSs() {
@@ -2629,17 +2617,18 @@ FROM users
     }
 
     public function actionGetUnreadNotificationNumber() {
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            $post = Yii::$app->request->post();
 
-
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-        $count = Notificaion::find()
-                ->where(['reciever_id' => $userId, 'is_read' => 0])
-                ->asArray()
-                ->count();
-
-        return $count;
+            $userId = $post["userId"];
+            $count = Notificaion::find()
+                    ->where(['reciever_id' => $userId, 'is_read' => 0])
+                    ->asArray()
+                    ->count();
+            return ['success' => true, 'message' => $count];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
 //    public function actionMakeNotificationsRead() {

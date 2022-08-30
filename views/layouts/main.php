@@ -16,7 +16,6 @@ AppAsset::register($this);
 
 Yii::$app->name = "The Leader World of Talents";
 
-
 echo ModalAjax::widget([
     'id' => 'my-ajax',
     'selector' => '.my-ajax', // all buttons in grid view with href attribute
@@ -37,8 +36,8 @@ echo ModalAjax::widget([
     <?php $this->registerCsrfMetaTags() ?>
             <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
-            
-            
+
+
         </head>-->
 
     <header>
@@ -102,8 +101,8 @@ echo ModalAjax::widget([
 </a>'
                 ,
                 '<a href="/streame2/web/index.php">
-                    <svg 
-                      
+                    <svg
+
 
                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="41.144" height="45" viewBox="0 0 41.144 45">
                     <defs>
@@ -127,7 +126,7 @@ echo ModalAjax::widget([
                 '<a href="/streame/web/index.php?r=site%2Flogin">
                     <svg
 
-                      
+
                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="46.252" height="45" viewBox="0 0 46.252 45">
                     <defs>
                     <filter id="Path_88" x="0" y="0" width="46.252" height="45" filterUnits="userSpaceOnUse">
@@ -147,7 +146,7 @@ echo ModalAjax::widget([
                     </a>',
                 '<a href="/streame2/web/index.php?r=site/profile">
                     <svg
-                        style="  
+                        style="
                         "
                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="45" height="45" viewBox="0 0 45 45">
                     <defs>
@@ -221,7 +220,7 @@ echo ModalAjax::widget([
                     <?= $content ?>
                                     <!--<a  href=https://play.google.com/store/apps/details?id=com.hadi.room><img width="50%" src="-->
                     <?php
-//                                    echo Url::base() . '/google-play-badge.png' 
+//                                    echo Url::base() . '/google-play-badge.png'
                     ?>
                     <!--"></a>-->
 
