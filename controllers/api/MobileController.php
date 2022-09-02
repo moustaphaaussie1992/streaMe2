@@ -65,140 +65,140 @@ class MobileController extends ApiController {
         return $user->coins;
     }
 
-    public function actionChallengeCheck() {
-
-
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-        $sql = "SELECT * FROM `rooms` WHERE is_challenge_finished= 0
-and challenge_date < CURDATE();";
-        $command = Yii::$app->db->createCommand($sql);
-        $arrayList = $command->queryAll();
-
-        if ($arrayList) {
-
-//            return $arrayList;
-            for ($i = 0; $i < sizeof($arrayList); $i++) {
-
-                $mention1 = $arrayList[$i]["mention"];
-                $mention2 = $arrayList[$i]["mention2"];
-                $mention3 = $arrayList[$i]["mention3"];
-                $room = Rooms::find()
-                        ->where(['id' => $arrayList[$i]["id"]])
-                        ->one();
-
-                $ids = array();
-                array_push($ids, $room->r_admin);
-
-                if ($room) {
-
-                    if ($mention3 == null && $mention2 == null) {
-
-                        $room->challenge_winner = $mention1;
-                        $room->is_challenge_finished = "1";
-                        $room->save();
-                        array_push($ids, $room->mention);
-                    } elseif ($mention3 == null) {
-                        array_push($ids, $room->mention);
-                        array_push($ids, $room->mention2);
-
-                        $sql_count_mention1query = " SELECT COUNT(*) AS count  FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention1 . " and post_id=" . $arrayList[$i]["id"] . "";
-                        $sql_count_mention2query = " SELECT COUNT(*) AS count  FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention2 . " and post_id=" . $arrayList[$i]["id"] . "";
-
-                        $command = Yii::$app->db->createCommand($sql_count_mention1query);
-                        $sql_count_mention1 = $command->queryOne();
-                        $command = Yii::$app->db->createCommand($sql_count_mention2query);
-                        $sql_count_mention2 = $command->queryOne();
-
-                        if ($sql_count_mention2["count"] > $sql_count_mention1["count"]) {
-                            $room->challenge_winner = $mention2;
-                            $room->is_challenge_finished = "1";
-                            $room->save();
-                            array_push($ids, $room->mention);
-                            $winner = $mention2;
-
-//                           return $sql_count_mention1;
-                        } elseif ($sql_count_mention2["count"] < $sql_count_mention1["count"]) {
-                            $room->challenge_winner = $mention1;
-                            $room->is_challenge_finished = "1";
-                            $room->save();
-                            array_push($ids, $room->mention2);
-                            $winner = $mention1;
-
-//                           return $sql_count_mention1;
-                        }
-                    } elseif ($mention3 != null && $mention2 != null && $mention1 != null) {
-
-
-
-                        $sql_count_mention1query = " SELECT COUNT(*) As count  FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention1 . " and post_id=" . $arrayList[$i]["id"] . "";
-                        $sql_count_mention2query = " SELECT COUNT(*) As count   FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention2 . " and post_id=" . $arrayList[$i]["id"] . "";
-                        $sql_count_mention3query = " SELECT COUNT(*) As count  FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention3 . " and post_id=" . $arrayList[$i]["id"] . "";
-
-                        $command = Yii::$app->db->createCommand($sql_count_mention1query);
-                        $sql_count_mention1 = $command->queryOne();
-                        $command = Yii::$app->db->createCommand($sql_count_mention2query);
-                        $sql_count_mention2 = $command->queryOne();
-
-                        $command = Yii::$app->db->createCommand($sql_count_mention3query);
-                        $sql_count_mention3 = $command->queryOne();
-
-                        if ($sql_count_mention2["count"] > $sql_count_mention1["count"] && $sql_count_mention2["count"] > $sql_count_mention3["count"]) {
-                            $room->challenge_winner = $mention2;
-                            $room->is_challenge_finished = "1";
-                            $room->save();
-                            array_push($ids, $room->mention);
-                            $winner = $mention2;
-                            array_push($ids, $room->mention3);
-                        } elseif ($sql_count_mention2["count"] < $sql_count_mention1["count"] && $sql_count_mention3["count"] < $sql_count_mention1["count"]) {
-                            $room->challenge_winner = $mention1;
-                            $room->is_challenge_finished = "1";
-                            array_push($ids, $room->mention2);
-                            $winner = $mention1;
-                            array_push($ids, $room->mention3);
-                            $room->save();
-                        } elseif ($sql_count_mention2["count"] < $sql_count_mention3["count"] && $sql_count_mention1["count"] < $sql_count_mention3["count"]) {
-                            $room->challenge_winner = $mention3;
-                            $room->is_challenge_finished = "1";
-                            array_push($ids, $room->mention1);
-                            $winner = $mention3;
-                            array_push($ids, $room->mention2);
-                            $room->save();
-                        }
-                    }
-                }
-
-
-                $tokens = Users::find()
-                        ->select("token")
-                        ->where(["id" => $ids])
-                        ->asArray()
-                        ->all();
-                $winnerUser = Users::find()
-                        ->where(["id" => $winner])
-                        ->asArray()
-                        ->one();
-
-                $votersTokens = "SELECT  users.token as token FROM `challenge_voting`
-left join users on users.id = challenge_voting.r_user
-WHERE challenge_voting.post_id=" . $room->id;
-
-                $command = Yii::$app->db->createCommand($votersTokens);
-                $votersTokensArray = $command->queryAll();
-
-                for ($j = 0; $j < sizeof($votersTokensArray); $j++) {
-
-                    array_push($tokens, $votersTokensArray[$j]);
-                }
-
-//                  return ["tokens" => $tokens,
-//                    "winner" => $winnerUser,
-//                    "room" => $arrayList[$i]];
-
-                NotificationForm::notifyVotersTheWinner($tokens, $winnerUser, $arrayList[$i]);
-            }
-        }
-    }
+//    public function actionChallengeCheck() {
+//
+//
+//        $post = Yii::$app->request->post();
+//        $userId = $post["userId"];
+//        $sql = "SELECT * FROM `rooms` WHERE is_challenge_finished= 0
+//and challenge_date < CURDATE();";
+//        $command = Yii::$app->db->createCommand($sql);
+//        $arrayList = $command->queryAll();
+//
+//        if ($arrayList) {
+//
+////            return $arrayList;
+//            for ($i = 0; $i < sizeof($arrayList); $i++) {
+//
+//                $mention1 = $arrayList[$i]["mention"];
+//                $mention2 = $arrayList[$i]["mention2"];
+//                $mention3 = $arrayList[$i]["mention3"];
+//                $room = Rooms::find()
+//                        ->where(['id' => $arrayList[$i]["id"]])
+//                        ->one();
+//
+//                $ids = array();
+//                array_push($ids, $room->r_admin);
+//
+//                if ($room) {
+//
+//                    if ($mention3 == null && $mention2 == null) {
+//
+//                        $room->challenge_winner = $mention1;
+//                        $room->is_challenge_finished = "1";
+//                        $room->save();
+//                        array_push($ids, $room->mention);
+//                    } elseif ($mention3 == null) {
+//                        array_push($ids, $room->mention);
+//                        array_push($ids, $room->mention2);
+//
+//                        $sql_count_mention1query = " SELECT COUNT(*) AS count  FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention1 . " and post_id=" . $arrayList[$i]["id"] . "";
+//                        $sql_count_mention2query = " SELECT COUNT(*) AS count  FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention2 . " and post_id=" . $arrayList[$i]["id"] . "";
+//
+//                        $command = Yii::$app->db->createCommand($sql_count_mention1query);
+//                        $sql_count_mention1 = $command->queryOne();
+//                        $command = Yii::$app->db->createCommand($sql_count_mention2query);
+//                        $sql_count_mention2 = $command->queryOne();
+//
+//                        if ($sql_count_mention2["count"] > $sql_count_mention1["count"]) {
+//                            $room->challenge_winner = $mention2;
+//                            $room->is_challenge_finished = "1";
+//                            $room->save();
+//                            array_push($ids, $room->mention);
+//                            $winner = $mention2;
+//
+////                           return $sql_count_mention1;
+//                        } elseif ($sql_count_mention2["count"] < $sql_count_mention1["count"]) {
+//                            $room->challenge_winner = $mention1;
+//                            $room->is_challenge_finished = "1";
+//                            $room->save();
+//                            array_push($ids, $room->mention2);
+//                            $winner = $mention1;
+//
+////                           return $sql_count_mention1;
+//                        }
+//                    } elseif ($mention3 != null && $mention2 != null && $mention1 != null) {
+//
+//
+//
+//                        $sql_count_mention1query = " SELECT COUNT(*) As count  FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention1 . " and post_id=" . $arrayList[$i]["id"] . "";
+//                        $sql_count_mention2query = " SELECT COUNT(*) As count   FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention2 . " and post_id=" . $arrayList[$i]["id"] . "";
+//                        $sql_count_mention3query = " SELECT COUNT(*) As count  FROM `challenge_voting`  WHERE r_streamer_voted = " . $mention3 . " and post_id=" . $arrayList[$i]["id"] . "";
+//
+//                        $command = Yii::$app->db->createCommand($sql_count_mention1query);
+//                        $sql_count_mention1 = $command->queryOne();
+//                        $command = Yii::$app->db->createCommand($sql_count_mention2query);
+//                        $sql_count_mention2 = $command->queryOne();
+//
+//                        $command = Yii::$app->db->createCommand($sql_count_mention3query);
+//                        $sql_count_mention3 = $command->queryOne();
+//
+//                        if ($sql_count_mention2["count"] > $sql_count_mention1["count"] && $sql_count_mention2["count"] > $sql_count_mention3["count"]) {
+//                            $room->challenge_winner = $mention2;
+//                            $room->is_challenge_finished = "1";
+//                            $room->save();
+//                            array_push($ids, $room->mention);
+//                            $winner = $mention2;
+//                            array_push($ids, $room->mention3);
+//                        } elseif ($sql_count_mention2["count"] < $sql_count_mention1["count"] && $sql_count_mention3["count"] < $sql_count_mention1["count"]) {
+//                            $room->challenge_winner = $mention1;
+//                            $room->is_challenge_finished = "1";
+//                            array_push($ids, $room->mention2);
+//                            $winner = $mention1;
+//                            array_push($ids, $room->mention3);
+//                            $room->save();
+//                        } elseif ($sql_count_mention2["count"] < $sql_count_mention3["count"] && $sql_count_mention1["count"] < $sql_count_mention3["count"]) {
+//                            $room->challenge_winner = $mention3;
+//                            $room->is_challenge_finished = "1";
+//                            array_push($ids, $room->mention1);
+//                            $winner = $mention3;
+//                            array_push($ids, $room->mention2);
+//                            $room->save();
+//                        }
+//                    }
+//                }
+//
+//
+//                $tokens = Users::find()
+//                        ->select("token")
+//                        ->where(["id" => $ids])
+//                        ->asArray()
+//                        ->all();
+//                $winnerUser = Users::find()
+//                        ->where(["id" => $winner])
+//                        ->asArray()
+//                        ->one();
+//
+//                $votersTokens = "SELECT  users.token as token FROM `challenge_voting`
+//left join users on users.id = challenge_voting.r_user
+//WHERE challenge_voting.post_id=" . $room->id;
+//
+//                $command = Yii::$app->db->createCommand($votersTokens);
+//                $votersTokensArray = $command->queryAll();
+//
+//                for ($j = 0; $j < sizeof($votersTokensArray); $j++) {
+//
+//                    array_push($tokens, $votersTokensArray[$j]);
+//                }
+//
+////                  return ["tokens" => $tokens,
+////                    "winner" => $winnerUser,
+////                    "room" => $arrayList[$i]];
+//
+//                NotificationForm::notifyVotersTheWinner($tokens, $winnerUser, $arrayList[$i]);
+//            }
+//        }
+//    }
 
     public function actionMakeDonation() {
         $post = Yii::$app->request->post();
@@ -1088,21 +1088,21 @@ FROM users
 //        }
 //    }
 
-    public function actionStreamerDeclineLoseChallenge() {
-        $post = Yii::$app->request->post();
-        $roomId = $post["roomId"];
-        $room = Rooms::find()
-                ->where(['id' => $roomId])
-                ->one();
-        if ($room) {
-
-            $room->streamer_response = 0;
-            if ($room->save()) {
-                return true;
-            } else
-                return $room->errors;
-        }
-    }
+//    public function actionStreamerDeclineLoseChallenge() {
+//        $post = Yii::$app->request->post();
+//        $roomId = $post["roomId"];
+//        $room = Rooms::find()
+//                ->where(['id' => $roomId])
+//                ->one();
+//        if ($room) {
+//
+//            $room->streamer_response = 0;
+//            if ($room->save()) {
+//                return true;
+//            } else
+//                return $room->errors;
+//        }
+//    }
 
     public function actionGetProUsersPosts() {
 
@@ -1360,26 +1360,26 @@ FROM users
             return $user->errors;
     }
 
-    public function actionSignup2() {
-        $post = Yii::$app->request->post();
-        $fullname = $post["fullname"];
-        $url = $post["link"];
-        $password = $post["password"];
-        $username = $post["username"];
-        $pubgId = $post["pubgId"];
-        $user = new Users();
-        $user->username = $username;
-        $user->fullname = $fullname;
-        $user->link = $url;
-        $user->role = 1;
-        $user->pubgid = $pubgId;
-        $user->password = $password;
-
-        if ($user->save()) {
-            return true;
-        } else
-            return false;
-    }
+//    public function actionSignup2() {
+//        $post = Yii::$app->request->post();
+//        $fullname = $post["fullname"];
+//        $url = $post["link"];
+//        $password = $post["password"];
+//        $username = $post["username"];
+//        $pubgId = $post["pubgId"];
+//        $user = new Users();
+//        $user->username = $username;
+//        $user->fullname = $fullname;
+//        $user->link = $url;
+//        $user->role = 1;
+//        $user->pubgid = $pubgId;
+//        $user->password = $password;
+//
+//        if ($user->save()) {
+//            return true;
+//        } else
+//            return false;
+//    }
 
     public function actionLogin() {
 
@@ -1533,129 +1533,129 @@ FROM users
         }
     }
 
-    public function actionSendNotificationMyUsers() {
+//    public function actionSendNotificationMyUsers() {
+//
+//        $post = Yii::$app->request->post();
+//        $roomId = $post["roomId"];
+//        $userId = $post["userId"];
+//
+//        $tokens = (new Query)
+//                ->select("users.token  ")
+//                ->from(Follow::tableName())
+//                ->where([
+//                    "r_page" => $userId
+//                ])
+//                ->join("join", "users", Follow::tableName() . ".r_user = users.id")
+//                ->column();
+//
+//        $room = Rooms::find()
+//                ->where(['id' => $roomId])
+//                ->one();
+//
+//        $pageName = $room["page_name"];
+//        $userNotifications = UserNotifications::find()->where(["user_id" => $userId])->one();
+//
+//        if ($userNotifications) {
+//
+//            $remainingNotifications = $userNotifications["number_remaining"];
+//            if ($remainingNotifications > 0) {
+//
+//                $notification = new NotificationForm();
+//                $notification->subject = "Streamer " . $pageName;
+//                $notification->message = "My Stream is Live Now";
+//                $notification->notifyToUserGoToAd($tokens, $roomId);
+//
+//                $userNotifications["number_remaining"] = $userNotifications["number_remaining"] - 1;
+//
+//                $userNotifications->save();
+//
+//                return "Notification Sent";
+//            } else
+//                return "Your Notification Balance is Empty Please recharge";
+//        } else
+//            return "You don't have Any purchase";
+//    }
+//
+//    public function actionSendNotificationAllUsers() {
+//
+//        $post = Yii::$app->request->post();
+//        $roomId = $post["roomId"];
+//        $userId = $post["userId"];
+//
+//        $room = Rooms::find()
+//                ->where(['id' => $roomId])
+//                ->one();
+//
+//        $pageName = $room["page_name"];
+//
+//        $tokens = (new Query)
+//                ->select("token")
+//                ->from("users")
+//                ->column();
+//
+//        $userNotifications = UserNotifications::find()->where(["user_id" => $userId])->one();
+//
+//        if ($userNotifications) {
+//
+//            $remainingNotifications = $userNotifications["number_remaining_for_all_users"];
+//            if ($remainingNotifications > 0) {
+//
+//                $notification = new NotificationForm();
+//                $notification->subject = "Streamer " . $pageName;
+//                $notification->message = "My Stream is Live Now";
+//                $notification->notifyToUserGoToAd($tokens, $roomId);
+//
+//                $userNotifications["number_remaining_for_all_users"] = $userNotifications["number_remaining_for_all_users"] - 1;
+//                $userNotifications->save();
+//
+//                return "Notification For All Users Sent";
+//            } else
+//                return "Your Notification Balance is Empty Please recharge";
+//        } else
+//            return "You don't have Any purchase";
+//
+//
+//
+////        return ["room" => $room, "tokens" => $tokens, "notifications" => $userNotifications];
+//    }
 
-        $post = Yii::$app->request->post();
-        $roomId = $post["roomId"];
-        $userId = $post["userId"];
-
-        $tokens = (new Query)
-                ->select("users.token  ")
-                ->from(Follow::tableName())
-                ->where([
-                    "r_page" => $userId
-                ])
-                ->join("join", "users", Follow::tableName() . ".r_user = users.id")
-                ->column();
-
-        $room = Rooms::find()
-                ->where(['id' => $roomId])
-                ->one();
-
-        $pageName = $room["page_name"];
-        $userNotifications = UserNotifications::find()->where(["user_id" => $userId])->one();
-
-        if ($userNotifications) {
-
-            $remainingNotifications = $userNotifications["number_remaining"];
-            if ($remainingNotifications > 0) {
-
-                $notification = new NotificationForm();
-                $notification->subject = "Streamer " . $pageName;
-                $notification->message = "My Stream is Live Now";
-                $notification->notifyToUserGoToAd($tokens, $roomId);
-
-                $userNotifications["number_remaining"] = $userNotifications["number_remaining"] - 1;
-
-                $userNotifications->save();
-
-                return "Notification Sent";
-            } else
-                return "Your Notification Balance is Empty Please recharge";
-        } else
-            return "You don't have Any purchase";
-    }
-
-    public function actionSendNotificationAllUsers() {
-
-        $post = Yii::$app->request->post();
-        $roomId = $post["roomId"];
-        $userId = $post["userId"];
-
-        $room = Rooms::find()
-                ->where(['id' => $roomId])
-                ->one();
-
-        $pageName = $room["page_name"];
-
-        $tokens = (new Query)
-                ->select("token")
-                ->from("users")
-                ->column();
-
-        $userNotifications = UserNotifications::find()->where(["user_id" => $userId])->one();
-
-        if ($userNotifications) {
-
-            $remainingNotifications = $userNotifications["number_remaining_for_all_users"];
-            if ($remainingNotifications > 0) {
-
-                $notification = new NotificationForm();
-                $notification->subject = "Streamer " . $pageName;
-                $notification->message = "My Stream is Live Now";
-                $notification->notifyToUserGoToAd($tokens, $roomId);
-
-                $userNotifications["number_remaining_for_all_users"] = $userNotifications["number_remaining_for_all_users"] - 1;
-                $userNotifications->save();
-
-                return "Notification For All Users Sent";
-            } else
-                return "Your Notification Balance is Empty Please recharge";
-        } else
-            return "You don't have Any purchase";
-
-
-
-//        return ["room" => $room, "tokens" => $tokens, "notifications" => $userNotifications];
-    }
-
-    public function actionCheckIfHaveNotifications() {
-
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-
-        $userNotifications = UserNotifications::find()->where(["user_id" => $userId])->one();
-
-        if ($userNotifications) {
-
-            $remainingNotifications = $userNotifications["number_remaining"];
-            if ($remainingNotifications > 0) {
-
-                return true;
-            } else
-                return false;
-        } else
-            return false;
-    }
-
-    public function actionCheckIfHaveNotificationsForAll() {
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-
-        $userNotifications = UserNotifications::find()->where(["user_id" => $userId])->one();
-
-        if ($userNotifications) {
-
-            $remainingNotifications = $userNotifications["number_remaining_for_all_users"];
-            if ($remainingNotifications > 0) {
-                return true;
-            } else
-                return false;
-        } else
-            return false;
-    }
+//    public function actionCheckIfHaveNotifications() {
+//
+//        $post = Yii::$app->request->post();
+//
+//        $userId = $post["userId"];
+//
+//        $userNotifications = UserNotifications::find()->where(["user_id" => $userId])->one();
+//
+//        if ($userNotifications) {
+//
+//            $remainingNotifications = $userNotifications["number_remaining"];
+//            if ($remainingNotifications > 0) {
+//
+//                return true;
+//            } else
+//                return false;
+//        } else
+//            return false;
+//    }
+//
+//    public function actionCheckIfHaveNotificationsForAll() {
+//        $post = Yii::$app->request->post();
+//
+//        $userId = $post["userId"];
+//
+//        $userNotifications = UserNotifications::find()->where(["user_id" => $userId])->one();
+//
+//        if ($userNotifications) {
+//
+//            $remainingNotifications = $userNotifications["number_remaining_for_all_users"];
+//            if ($remainingNotifications > 0) {
+//                return true;
+//            } else
+//                return false;
+//        } else
+//            return false;
+//    }
 
     public function actionUnfollow() {
         $post = Yii::$app->request->post();
@@ -1936,59 +1936,59 @@ FROM users
         }
     }
 
-    public function actionSliverSpinReward() {
+//    public function actionSliverSpinReward() {
+//
+//        $post = Yii::$app->request->post();
+//
+//        $userId = $post["userId"];
+//        $prizeId = $post["prizeId"];
+//        $reward = new UsersSpinSilver();
+//        $reward->userId = $userId;
+//        $reward->prizedId = $prizeId;
+//        $reward->date = date("Y-m-d H:i:s");
+//
+//        if ($reward->save()) {
+//            return true;
+//        } else {
+//            return $reward->errors;
+//        }
+//    }
 
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-        $prizeId = $post["prizeId"];
-        $reward = new UsersSpinSilver();
-        $reward->userId = $userId;
-        $reward->prizedId = $prizeId;
-        $reward->date = date("Y-m-d H:i:s");
-
-        if ($reward->save()) {
-            return true;
-        } else {
-            return $reward->errors;
-        }
-    }
-
-    public function actionCheckSpin() {
-
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-        $date = date("Y-m-d H:i:s");
-        $timestamp1 = strtotime($date);
-
-        $reward = (new Query)
-                ->select("*")
-                ->from("users_spin_silver")
-                ->where(['userId' => $userId])
-                ->orderBy("id Desc")
-                ->one();
-        $timestamp2 = strtotime($reward['date']);
-
-        if ((($timestamp1 - $timestamp2) / 3600) > 24) {
-
-            return false;
-//            return ["result" => "can",
-//                "date" => $reward['date'],
-//                "reward" => $reward,
-//                "time1" => $timestamp1,
-//                "time2" => $timestamp2,
-//                "diff" => ($timestamp1 - $timestamp2) / 3600];
-        } else {
-            return true;
-//            return ["result" => "can't",
-//                "date" => $reward['date'],
-//                "reward" => $reward,
-//                "time1" => $timestamp1,
-//                "time2" => $timestamp2,
-//                "diff" => ($timestamp1 - $timestamp2) / 3600];
-        }
-    }
+//    public function actionCheckSpin() {
+//
+//        $post = Yii::$app->request->post();
+//
+//        $userId = $post["userId"];
+//        $date = date("Y-m-d H:i:s");
+//        $timestamp1 = strtotime($date);
+//
+//        $reward = (new Query)
+//                ->select("*")
+//                ->from("users_spin_silver")
+//                ->where(['userId' => $userId])
+//                ->orderBy("id Desc")
+//                ->one();
+//        $timestamp2 = strtotime($reward['date']);
+//
+//        if ((($timestamp1 - $timestamp2) / 3600) > 24) {
+//
+//            return false;
+////            return ["result" => "can",
+////                "date" => $reward['date'],
+////                "reward" => $reward,
+////                "time1" => $timestamp1,
+////                "time2" => $timestamp2,
+////                "diff" => ($timestamp1 - $timestamp2) / 3600];
+//        } else {
+//            return true;
+////            return ["result" => "can't",
+////                "date" => $reward['date'],
+////                "reward" => $reward,
+////                "time1" => $timestamp1,
+////                "time2" => $timestamp2,
+////                "diff" => ($timestamp1 - $timestamp2) / 3600];
+//        }
+//    }
 
     public function actionUnfollowStreamer() {
 
@@ -2360,25 +2360,25 @@ FROM users
         }
     }
 
-    public function actionTestUploadVideo() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $title = $_POST[""];
-            $file_name = $_FILES['myFile']['name'];
-            $ext = pathinfo($file_name, PATHINFO_EXTENSION);
-//            $file_size = $_FILES['myFile']['size'];
-//            $file_type = $_FILES['myFile']['type'];
-            $temp_name = $_FILES['myFile']['tmp_name'];
-
-            $randomFileName = Yii::$app->security->generateRandomString() . "." . $ext;
-            $location = "postVideos/";
-
-            move_uploaded_file($temp_name, $location . $randomFileName);
-
-            return "https://" . Yii::$app->params['domain'] . "/postVideos/" . $randomFileName;
-        } else {
-            return "Error";
-        }
-    }
+//    public function actionTestUploadVideo() {
+//        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+//            $title = $_POST[""];
+//            $file_name = $_FILES['myFile']['name'];
+//            $ext = pathinfo($file_name, PATHINFO_EXTENSION);
+////            $file_size = $_FILES['myFile']['size'];
+////            $file_type = $_FILES['myFile']['type'];
+//            $temp_name = $_FILES['myFile']['tmp_name'];
+//
+//            $randomFileName = Yii::$app->security->generateRandomString() . "." . $ext;
+//            $location = "postVideos/";
+//
+//            move_uploaded_file($temp_name, $location . $randomFileName);
+//
+//            return "https://" . Yii::$app->params['domain'] . "/postVideos/" . $randomFileName;
+//        } else {
+//            return "Error";
+//        }
+//    }
 
     public function actionProPostViewed() {
 
