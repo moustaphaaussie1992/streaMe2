@@ -63,7 +63,7 @@ class Rooms extends \yii\db\ActiveRecord {
         return [
             [['c_text'], 'string'],
             [['r_admin'], 'required'],
-            [['r_admin', 'game', 'mention', 'mention2', 'mention3', 'accept1', 'accept2', 'accept3', 'challenge_coins', 'is_challenge_finished', 'challenge_winner', 'streamer_response', 'invitation_response'], 'integer'],
+            [['r_admin', 'game', 'mention', 'mention2', 'mention3', 'accept1', 'accept2', 'accept3', 'challenge_coins', 'is_challenge_finished', 'challenge_winner', 'streamer_response', 'invitation_response', 'active'], 'integer'],
             [['creation_date', 'challenge_date'], 'safe'],
             [['title'], 'string', 'max' => 255],
             [['type'], 'string', 'max' => 50],
@@ -71,7 +71,7 @@ class Rooms extends \yii\db\ActiveRecord {
                 'extensions' => 'png,jpg,mp4',
                 'maxFiles' => 5,
             ],
-              [['video'], 'file', 'skipOnEmpty' => true,
+            [['video'], 'file', 'skipOnEmpty' => true,
                 'extensions' => 'mp4',
                 'maxFiles' => 5,
             ],

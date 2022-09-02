@@ -677,7 +677,7 @@ if ($room["type"] == "text") {
     <?php
     if (Yii::$app->getUser()->id != null) {
         ?>
-        }
+
         <div style="margin-bottom: 10px;">
             <input id="commentText" class="form-control" placeholder="Comment" style="width: 83%;float: left;margin: 3px;" />
             <button id="snedComment"
