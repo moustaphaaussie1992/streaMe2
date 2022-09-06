@@ -37,21 +37,6 @@ class MobileController extends ApiController {
             return ['success' => true, 'test' => 'Hello World!'];
         }
         return ['success' => false, 'test' => 'Hello World!'];
-
-//        $frame = 10;
-//        $movie = 'test.mp4';
-//        $thumbnail = 'thumbnail.png';
-//        $mov = new ffmpeg_movie($movie);
-//        $screenShotr = new \ScreenShotr\Core('http://streameapp.com/postVideos/jU5g93iiLen56VqJtxV2DbgPcdXRIwu2.mp4');
-//        $screenShotr = new \ScreenShotr\Core('videoUploads/ddd.mp4');
-//        $screenshot = $screenShotr->generateScreenshot(1);
-//        return $screenshot;
-//        $obj = new GenerateVideoScreenshots("videoUploads/ddd.mp4");
-//        return $obj;
-//        return $obj->setOutputPath('output_location');
-//        $thumbnail = $obj->generateScreenshot('http://streameapp.com/postVideos/jU5g93iiLen56VqJtxV2DbgPcdXRIwu2.mp4');
-//        return $thumbnail;
-//        $video = $ffmpeg->open("http://streameapp.com/postVideos/jU5g93iiLen56VqJtxV2DbgPcdXRIwu2.mp4");
     }
 
     public function actionGetCoins() {
@@ -266,227 +251,180 @@ class MobileController extends ApiController {
     }
 
     public function actionCreateRoom() {
-        $post = Yii::$app->request->post();
-        $title = $post["title"];
-        $text = $post["text"];
-        $user = $post["userId"];
-        $type = $post["type"];
-        $category = $post["category"];
-        $mention = $post["mention"];
-        $mention2 = $post["mention2"];
-        $mention3 = $post["mention3"];
-        $challengeTime = $post["challengeTime"];
-        $gameId = $post["game"];
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $title = isset($_POST["title"]) ? $_POST["title"] : null;
+                $text = isset($_POST["text"]) ? $_POST["text"] : null;
+                $user = $_POST["userId"];
+                $type = isset($_POST["type"]) ? $_POST["type"] : null;
+                $category = isset($_POST["category"]) ? $_POST["category"] : null;
+                $mention = isset($_POST["mention"]) ? $_POST["mention"] : null;
+                $mention2 = isset($_POST["mention2"]) ? $_POST["mention2"] : null;
+                $mention3 = isset($_POST["mention3"]) ? $_POST["mention3"] : null;
+                $challengeTime = isset($_POST["challengeTime"]) ? $_POST["challengeTime"] : null;
+                $gameId = isset($_POST["game"]) ? $_POST["game"] : null;
 
-        $imageString = $post["imageString"];
-        $coins = $post["challengeCoins"];
+                $imageString = isset($post["imageString"]) ? $post["imageString"] : null;
+                $coins = isset($post["challengeCoins"]) ? $post["challengeCoins"] : null;
 
-        $room = new Rooms();
-        $room->title = $title;
-        $room->c_text = $text;
-        $room->r_admin = $user;
-        $room->type = $type;
-        $room->category = $category;
-        $room->mention = $mention;
-        $room->challenge_coins = $coins;
-        $room->challenge_date = $challengeTime;
-        $room->mention2 = $mention2;
-        $room->mention3 = $mention3;
-        $room->game = $gameId;
-        $room->creation_date = date("Y-m-d H:i:s");
+                $room = new Rooms();
+                $room->title = $title;
+                $room->c_text = $text;
+                $room->r_admin = $user;
+                $room->type = $type;
+                $room->category = $category;
 
-        if ($category == "challenge") {
-            $creatorUser = Users::findOne(["id" => $user]);
-            if ($creatorUser) {
-                if ($creatorUser->coins >= $coins) {
-
-                } else {
-                    return "nocoins";
-                }
-            } else {
-                return "nouser";
-            }
-        }
-
-        if ($type == "text" || $category == "challenge") {
-            $color1 = $post["color1"];
-            $color2 = $post["color2"];
-            $room->color1 = $color1;
-            $room->color2 = $color2;
-            if ($color1 == null || $color2 == null || $color1 == "" || $color2 == "") {
-                $color1 = "#CE2E6F";
-                $color2 = "#671738";
-            }
-//            return $room;
-//            return $room;
-//            return $room->getErrors();
-            if ($room->save()) {
+                $room->mention = $mention;
+                $room->challenge_coins = $coins;
+                $room->challenge_date = $challengeTime;
+                $room->mention2 = $mention2;
+                $room->mention3 = $mention3;
+                $room->game = $gameId;
+                $room->creation_date = date("Y-m-d H:i:s");
                 if ($category == "challenge") {
+                    $creatorUser = Users::findOne(["id" => $user]);
+                    if ($creatorUser) {
+                        if ($creatorUser->coins >= $coins) {
 
-                    $userTransaction = new UserTransactions();
-                    $userTransaction->fromUser = $user;
-                    $userTransaction->coins = $coins;
-                    $userTransaction->type = "challenge";
-                    $userTransaction->roomId = $room->id;
-                    $userTransaction->save();
-                    $creatorUser->coins = $creatorUser->coins - $coins;
-                    $creatorUser->save();
-                    NotificationForm::notifyStreamersForChallenge($room);
-                }
-                return "true";
-            } else {
-                return $room->getErrors();
-            }
-        } else if ($type == "video") {
-
-
-
-
-            $file_name = $_FILES['myFile']['name'];
-            $ext = pathinfo($file_name, PATHINFO_EXTENSION);
-//            $file_size = $_FILES['myFile']['size'];
-//            $file_type = $_FILES['myFile']['type'];
-            $temp_name = $_FILES['myFile']['tmp_name'];
-            $randomFileName = Yii::$app->security->generateRandomString() . "." . $ext;
-            $location = "postVideos/";
-            if (move_uploaded_file($temp_name, $location . $randomFileName)) {
-                if ($room->save()) {
-                    $postFiles = new PostFiles();
-                    $postFiles->post_id = $room->primaryKey;
-                    $postFiles->file_name = $randomFileName;
-                    if ($postFiles->save()) {
-
-                        //for image
-                        $location = "postPictures/";
-                        $uploads_dir = $location;
-                        $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
-                        $percent = 1;
-
-                        $data = base64_decode($imageString);
-
-                        $im = imagecreatefromstring($data);
-                        $width = imagesx($im);
-                        $height = imagesy($im);
-                        $newwidth = $width * $percent;
-                        $newheight = $height * $percent;
-                        $thumb = imagecreatetruecolor($newwidth, $newheight);
-                        header('Content-type: image/jpeg');
-                        // Resize
-                        imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
-
-                        // Output
-//                    imagejpeg($im, $uploads_dir . $imageName);
-                        imagejpeg($thumb, $uploads_dir . $imageName);
-
-                        //save record to database table
-                        $room = Rooms::findOne(["id" => $room->primaryKey]);
-                        $room->video_thumbnail = $imageName;
-                        if ($room->save()) {
-//                            return "good everything is saved";
                         } else {
-//                            return $postFiles->getErrors();
+                            return ['success' => true, 'message' => 'nocoins'];
                         }
-//                        return "good post only saved";
-                        //////
                     } else {
-                        return $postFiles->getErrors();
+                        return ['success' => true, 'message' => 'nouser'];
                     }
-                    return "true";
-//                    return "good post only saved";
-                } else {
-                    return $room->getErrors();
                 }
-            } else {
-                return "not upload";
-            }
-        } else if ($type == "pictures") {
+                if ($type == "text" || $category == "challenge") {
+                    $color1 = $post["color1"];
+                    $color2 = $post["color2"];
+                    $room->color1 = $color1;
+                    $room->color2 = $color2;
+                    if ($color1 == null || $color2 == null || $color1 == "" || $color2 == "") {
+                        $color1 = "#CE2E6F";
+                        $color2 = "#671738";
+                    }
 
-            $color1 = $post["color1"];
-            $color2 = $post["color2"];
-
-            $imagesSize = $post["imagesSize"];
-            $location = "postPictures/";
-            if ($room->save()) {
-
-                for ($i = 0; $i < $imagesSize; $i++) {
-                    $image = $post["image" . ($i + 1)];
-
-                    $uploads_dir = $location;
-                    $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
-                    if ($image) {
-                        $percent = 1;
-
-                        $data = base64_decode($image);
-                        $im = imagecreatefromstring($data);
-
-                        $width = imagesx($im);
-                        $height = imagesy($im);
-                        $newwidth = $width * $percent;
-                        $newheight = $height * $percent;
-                        $thumb = imagecreatetruecolor($newwidth, $newheight);
-                        header('Content-type: image/jpeg');
-                        // Resize
-                        imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
-
-                        // Output
-//                    imagejpeg($im, $uploads_dir . $imageName);
-                        imagejpeg($thumb, $uploads_dir . $imageName);
-
-                        //save record to database table
-                        $postFiles = new PostFiles();
-                        $postFiles->post_id = $room->primaryKey;
-                        $postFiles->file_name = $imageName;
-                        if ($postFiles->save()) {
-//                            return "good everything is saved";
-                        } else {
-//                            return $postFiles->getErrors();
+                    if ($room->save()) {
+                        if ($category == "challenge") {
+                            $userTransaction = new UserTransactions();
+                            $userTransaction->fromUser = $user;
+                            $userTransaction->coins = $coins;
+                            $userTransaction->type = "challenge";
+                            $userTransaction->roomId = $room->id;
+                            $userTransaction->save();
+                            $creatorUser->coins = $creatorUser->coins - $coins;
+                            $creatorUser->save();
+                            NotificationForm::notifyStreamersForChallenge($room);
                         }
+                        return ['success' => true, 'message' => 'nocoins'];
+                    } else {
+                        return ['success' => false, 'data' => $room->getErrors()];
+                    }
+                } else if ($type == "video") {
+                    $file_name = $_FILES['myFile']['name'];
+                    $ext = pathinfo($file_name, PATHINFO_EXTENSION);
+                    $temp_name = $_FILES['myFile']['tmp_name'];
+                    $randomFileName = Yii::$app->security->generateRandomString() . "." . $ext;
+                    $location = "postVideos/";
+                    if (move_uploaded_file($temp_name, $location . $randomFileName)) {
+                        if ($room->save()) {
+                            $postFiles = new PostFiles();
+                            $postFiles->post_id = $room->primaryKey;
+                            $postFiles->file_name = $randomFileName;
+                            if ($postFiles->save()) {
+                                //for image
+                                $location = "postPictures/";
+                                $uploads_dir = $location;
+                                $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
+                                $percent = 1;
+                                $data = base64_decode($imageString);
+                                $im = imagecreatefromstring($data);
+                                $width = imagesx($im);
+                                $height = imagesy($im);
+                                $newwidth = $width * $percent;
+                                $newheight = $height * $percent;
+                                $thumb = imagecreatetruecolor($newwidth, $newheight);
+                                header('Content-type: image/jpeg');
+                                // Resize
+                                imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+                                // Output
+//                    imagejpeg($im, $uploads_dir . $imageName);
+                                imagejpeg($thumb, $uploads_dir . $imageName);
+                                //save record to database table
+                                $room = Rooms::findOne(["id" => $room->primaryKey]);
+                                $room->video_thumbnail = $imageName;
+                                if ($room->save()) {
+//                            return "good everything is saved";
+                                } else {
+//                            return $postFiles->getErrors();
+                                }
 //                        return "good post only saved";
+                                //////
+                            } else {
+                                return ['success' => false, 'data' => $postFiles->getErrors()];
+                            }
+                            return ['success' => true, 'message' => ''];
+//                    return "good post only saved";
+                        } else {
+                            return $room->getErrors();
+                        }
+                    } else {
+                        return "not upload";
+                    }
+                } else if ($type == "pictures") {
+                    $color1 = $post["color1"];
+                    $color2 = $post["color2"];
+                    $imagesSize = $post["imagesSize"];
+                    $location = "postPictures/";
+                    if ($room->save()) {
+                        for ($i = 0; $i < $imagesSize; $i++) {
+                            $image = $post["image" . ($i + 1)];
+                            $uploads_dir = $location;
+                            $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
+                            if ($image) {
+                                $percent = 1;
+                                $data = base64_decode($image);
+                                $im = imagecreatefromstring($data);
+                                $width = imagesx($im);
+                                $height = imagesy($im);
+                                $newwidth = $width * $percent;
+                                $newheight = $height * $percent;
+                                $thumb = imagecreatetruecolor($newwidth, $newheight);
+                                header('Content-type: image/jpeg');
+                                // Resize
+                                imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+
+                                // Output
+//                    imagejpeg($im, $uploads_dir . $imageName);
+                                imagejpeg($thumb, $uploads_dir . $imageName);
+
+                                //save record to database table
+                                $postFiles = new PostFiles();
+                                $postFiles->post_id = $room->primaryKey;
+                                $postFiles->file_name = $imageName;
+                                if ($postFiles->save()) {
+//                            return "good everything is saved";
+                                } else {
+//                            return $postFiles->getErrors();
+                                }
+//                        return "good post only saved";
+                            }
+                        }
+                    } else {
+                        return ['success' => false, 'data' => $room->getErrors()];
+                    }
+                    return ['success' => true, 'message' => ''];
+                } else {
+                    if ($room->save()) {
+                        return ['success' => true, 'message' => ''];
+                    } else {
+                        return ['success' => false, 'data' => $room->getErrors()];
                     }
                 }
-            } else {
-                return $room->getErrors();
             }
-            return "true";
-        } else {
-            if ($room->save()) {
-                return "true";
-            } else {
-                return $room->getErrors();
-            }
+            return ['success' => false, 'message' => 'missing params'];
         }
-
-
-//        return "https://www.streameapp.com/postVideos/" . $randomFileName;
-//
-//
-//
-//
-//        $post = Yii::$app->request->post();
-//        $title = $post["title"];
-//        $text = $post["text"];
-//        $user = $post["userId"];
-//        $type = $post["type"];
-//        $category = $post["category"];
-//        $mention = $post["mention"];
-//
-//        $room = new Rooms();
-//        $room->title = $title;
-//        $room->c_text = $text;
-//        $room->r_admin = $user;
-//        $room->type = $type;
-//        $room->category = $category;
-//        $room->mention = $mention;
-//        $room->creation_date = date("Y-m-d H:i:s");
-//
-//
-//
-//
-//        if ($room->save()) {
-//            return true;
-//        } else {
-//            return $room->errors;
-//        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetChallengesVideos() {
@@ -705,57 +643,47 @@ class MobileController extends ApiController {
     }
 
     public function actionGetRooms() {
-
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-        $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
             (SELECT COUNT(id) FROM followrooms WHERE r_room = rooms.id) as number_of_likes,
             (SELECT COUNT(id) FROM comment WHERE r_room = rooms.id) as number_of_comments,
-            (SELECT c_text FROM comment WHERE r_room = rooms.id ORDER BY id DESC LIMIT 1) as last_comment,
-
-type,
+            (SELECT c_text FROM comment WHERE r_room = rooms.id ORDER BY id DESC LIMIT 1) as last_comment, type,
             (SELECT GROUP_CONCAT(file_name SEPARATOR ',') FROM post_files WHERE post_id = rooms.id) as files
              FROM rooms
              JOIN users ON rooms.r_admin = users.id
              LEFT JOIN followrooms ON followrooms.r_room = rooms.id AND followrooms.r_user = $userId
-
              ORDER BY rooms.creation_date DESC;";
-        $command = Yii::$app->db->createCommand($sql);
-        $arrayList = $command->queryAll();
-// WHERE rooms.creation_date >= CURDATE()
-
-        for ($i = 0; $i < sizeof($arrayList); $i++) {
-            $item = $arrayList[$i];
-            if ($item["category"] == "challenge") {
-                if ($item["accept1"] == 0 && $item["accept2"] == 0 && $item["accept3"] == 0) {
-                    array_splice($arrayList, $i, 1);
-                } else {
-                    $challengeVideos = MobileController::getChallengesVideosMentioned($item["id"], $item["mention"], $item["mention2"], $item["mention3"]);
-                    $arrayList[$i]["challengesVideos"] = $challengeVideos;
-                    if ($challengeVideos[0]["isChallenge"] == "0" && $challengeVideos[1]["isChallenge"] == "0" && $challengeVideos[2]["isChallenge"] == "0") {
-                        array_splice($arrayList, $i, 1);
+                $command = Yii::$app->db->createCommand($sql);
+                $arrayList = $command->queryAll();
+                for ($i = 0; $i < sizeof($arrayList); $i++) {
+                    $item = $arrayList[$i];
+                    if ($item["category"] == "challenge") {
+                        if ($item["accept1"] == 0 && $item["accept2"] == 0 && $item["accept3"] == 0) {
+                            array_splice($arrayList, $i, 1);
+                        } else {
+                            $challengeVideos = MobileController::getChallengesVideosMentioned($item["id"], $item["mention"], $item["mention2"], $item["mention3"]);
+                            $arrayList[$i]["challengesVideos"] = $challengeVideos;
+                            if ($challengeVideos[0]["isChallenge"] == "0" && $challengeVideos[1]["isChallenge"] == "0" && $challengeVideos[2]["isChallenge"] == "0") {
+                                array_splice($arrayList, $i, 1);
+                            }
+                        }
+                    } else if ($item["category"] == "donate") {
+                        $donations = "SELECT  SUM(user_transactions.coins) AS value_sum FROM user_transactions WHERE roomId =" . $item["id"];
+                        $command1 = Yii::$app->db->createCommand($donations);
+                        $itemDonate = $command1->queryOne();
+                        $arrayList[$i]["number_of_donates"] = $itemDonate["value_sum"];
+                    } else {
+                        $arrayList[$i]["challengesVideos"] = null;
                     }
                 }
-            } else if ($item["category"] == "donate") {
-
-//                $arrayList[$i]["challengesVideos"] = null;
-//
-                $donations = "SELECT  SUM(user_transactions.coins) AS value_sum
-FROM user_transactions
-WHERE roomId =" . $item["id"];
-
-                $command1 = Yii::$app->db->createCommand($donations);
-//              return  $command1->queryOne()["value_sum"];
-                $itemDonate = $command1->queryOne();
-                $arrayList[$i]["number_of_donates"] = $itemDonate["value_sum"];
-//
-            } else {
-                $arrayList[$i]["challengesVideos"] = null;
+                return ['success' => true, 'dataJsonArray' => $arrayList];
             }
+            return ['success' => false, 'message' => 'missing params'];
         }
-
-
-        return $arrayList;
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
 //     public function actionGetProUsersPosts() {
@@ -814,35 +742,27 @@ WHERE roomId =" . $item["id"];
 //        return $posts;
 
     public function actionGetFollowedStreamers() {
-
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-
-//
-//        $sql = "SELECT * FROM `users`
-//LEFT JOIN follow on users.id = follow.r_page
-//WHERE follow.r_user = $userId";
-//        $command = Yii::$app->db->createCommand($sql);
-//        $arrayList = $command->queryAll();
-//
-        $streamers = Users::find()
-                ->leftJoin('follow', 'users.id = follow.r_page')
-                ->where(['follow.r_user' => $userId])
-                ->all();
-
-        return $streamers;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $streamers = Users::find()
+                        ->leftJoin('follow', 'users.id = follow.r_page')
+                        ->where(['follow.r_user' => $userId])
+                        ->all();
+                return ['success' => true, 'dataJsonArray' => $streamers];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetRoomsByUser() {
-
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-
-//        $rooms = Rooms::find()
-//                ->where(['r_admin' => $userId])
-//                ->all();
-
-        $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
             (SELECT COUNT(id) FROM followrooms WHERE r_room = rooms.id) as number_of_likes,type,
             (SELECT GROUP_CONCAT(file_name SEPARATOR ',') FROM post_files WHERE post_id = rooms.id) as files,
             (SELECT COUNT(id) FROM comment WHERE r_room = rooms.id) as number_of_comments,
@@ -852,10 +772,14 @@ WHERE roomId =" . $item["id"];
              LEFT JOIN followrooms ON followrooms.r_room = rooms.id AND followrooms.r_user = $userId
              WHERE  rooms.r_admin = $userId AND rooms.category != 'challenge'   ORDER BY rooms.creation_date DESC ;";
 
-        $command = Yii::$app->db->createCommand($sql);
-        $arrayList = $command->queryAll();
+                $command = Yii::$app->db->createCommand($sql);
+                $arrayList = $command->queryAll();
 
-        return $arrayList;
+                return ['success' => true, 'dataJsonArray' => $arrayList];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetPostsBySearch() {
@@ -942,18 +866,11 @@ FROM users
 
     public function actionGetRelatedChallenges() {
 
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-
-//        $rooms = Rooms::find()
-//                ->where(['r_admin' => $userId])
-//                ->all();
-
-
-
-
-
-        $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
             (SELECT COUNT(id) FROM followrooms WHERE r_room = rooms.id) as number_of_likes,type,
             (SELECT GROUP_CONCAT(file_name SEPARATOR ',') FROM post_files WHERE post_id = rooms.id) as files,
                (SELECT COUNT(id) FROM comment WHERE r_room = rooms.id) as number_of_comments,
@@ -963,43 +880,37 @@ FROM users
                LEFT JOIN followrooms ON followrooms.r_room = rooms.id AND followrooms.r_user = $userId
              WHERE  rooms.mention = $userId OR rooms.r_admin = $userId OR rooms.mention2 = $userId OR rooms.mention3 = $userId AND rooms.category = 'challenge'ORDER BY rooms.creation_date DESC ";
 
-        $command = Yii::$app->db->createCommand($sql);
-        $arrayList = $command->queryAll();
-
-        for ($i = 0; $i < sizeof($arrayList); $i++) {
-            $item = $arrayList[$i];
-            if ($item["category"] == "challenge") {
-                if ($item["accept1"] == 0 && $item["accept2"] == 0 && $item["accept3"] == 0) {
+                $command = Yii::$app->db->createCommand($sql);
+                $arrayList = $command->queryAll();
+                for ($i = 0; $i < sizeof($arrayList); $i++) {
+                    $item = $arrayList[$i];
+                    if ($item["category"] == "challenge") {
+                        if ($item["accept1"] == 0 && $item["accept2"] == 0 && $item["accept3"] == 0) {
 //                    array_splice($arrayList, $i, 1);
-                    $arrayList[$i]["challengesVideos"] = null;
-                } else {
-                    $challengeVideos = MobileController::getChallengesVideosMentioned($item["id"], $item["mention"], $item["mention2"], $item["mention3"]);
-                    $arrayList[$i]["challengesVideos"] = $challengeVideos;
-                    if ($challengeVideos[0]["isChallenge"] == "0" && $challengeVideos[1]["isChallenge"] == "0" && $challengeVideos[2]["isChallenge"] == "0") {
+                            $arrayList[$i]["challengesVideos"] = null;
+                        } else {
+                            $challengeVideos = MobileController::getChallengesVideosMentioned($item["id"], $item["mention"], $item["mention2"], $item["mention3"]);
+                            $arrayList[$i]["challengesVideos"] = $challengeVideos;
+                            if ($challengeVideos[0]["isChallenge"] == "0" && $challengeVideos[1]["isChallenge"] == "0" && $challengeVideos[2]["isChallenge"] == "0") {
 //                        array_splice($arrayList, $i, 1);
-                        $arrayList[$i]["challengesVideos"] = null;
+                                $arrayList[$i]["challengesVideos"] = null;
+                            }
+                        }
                     }
                 }
+                return ['success' => true, 'dataJsonArray' => $arrayList];
             }
+            return ['success' => false, 'message' => 'missing params'];
         }
-
-        return $arrayList;
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetWinnedChallenges() {
-
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-
-//        $rooms = Rooms::find()
-//                ->where(['r_admin' => $userId])
-//                ->all();
-
-
-
-
-
-        $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
             (SELECT COUNT(id) FROM followrooms WHERE r_room = rooms.id) as number_of_likes,type,
             (SELECT GROUP_CONCAT(file_name SEPARATOR ',') FROM post_files WHERE post_id = rooms.id) as files
              FROM rooms
@@ -1007,10 +918,14 @@ FROM users
                LEFT JOIN followrooms ON followrooms.r_room = rooms.id AND followrooms.r_user = $userId
              WHERE  rooms.challenge_winner = $userId  AND rooms.category = 'challenge'ORDER BY rooms.creation_date DESC ";
 
-        $command = Yii::$app->db->createCommand($sql);
-        $arrayList = $command->queryAll();
+                $command = Yii::$app->db->createCommand($sql);
+                $arrayList = $command->queryAll();
 
-        return $arrayList;
+                return ['success' => true, 'dataJsonArray' => $arrayList];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionAcceptChallenge() {
@@ -1087,7 +1002,6 @@ FROM users
 //            }
 //        }
 //    }
-
 //    public function actionStreamerDeclineLoseChallenge() {
 //        $post = Yii::$app->request->post();
 //        $roomId = $post["roomId"];
@@ -1105,56 +1019,44 @@ FROM users
 //    }
 
     public function actionGetProUsersPosts() {
-
-        \Yii::$app->response->format = Response::FORMAT_JSON;
-
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-
-//        $posts = (new Query)
-//                ->select('pro_user_posts.*,users.fullname,users.profile_picture')
-//                ->from("pro_user_posts")
-//                ->join('join', 'users', 'users.id = pro_user_posts.user_id')
-////                ->where(['>=', 'creation_date', new Expression('UNIX_TIMESTAMP(NOW() - INTERVAL 1 DAY)')])
-//                ->where('creation_date >= now() - INTERVAL 1 DAY')
-//                ->groupBy('pro_user_posts.user_id')
-//                    ->orderBy('creation_date DESC')
-//                ->all();
-//        return $posts;
-
-        $posts = (new Query)
-                ->select("pro_user_posts.*,users.fullname,users.profile_picture,
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $posts = (new Query)
+                        ->select("pro_user_posts.*,users.fullname,users.profile_picture,
                     COUNT(pro_user_posts.id) as count,
                     (SELECT COUNT(pro_user_posts_views.id) as count
                           FROM pro_user_posts_views
                           JOIN pro_user_posts  pup ON pup.id = pro_user_posts_views.pro_post_id
                           WHERE pro_user_posts_views.user_id = $userId  AND pup.user_id = pro_user_posts.user_id
                           ORDER BY pro_user_posts_views.creation_date DESC) as viewed_count")
-                ->from("pro_user_posts")
-                ->join('join', 'users', 'users.id = pro_user_posts.user_id')
+                        ->from("pro_user_posts")
+                        ->join('join', 'users', 'users.id = pro_user_posts.user_id')
 //                ->where(['>=', 'creation_date', new Expression('UNIX_TIMESTAMP(NOW() - INTERVAL 1 DAY)')])
-                ->where('creation_date >= now() - INTERVAL 1 DAY')
-                ->groupBy('pro_user_posts.user_id')
-                ->orderBy('creation_date DESC')
-                ->all();
+                        ->where('creation_date >= now() - INTERVAL 1 DAY')
+                        ->groupBy('pro_user_posts.user_id')
+                        ->orderBy('creation_date DESC')
+                        ->all();
 
-        $temp_array1 = [];
-        $temp_array2 = [];
-        for ($i = 0; $i < sizeof($posts); $i++) {
-            $post = $posts[$i];
-            if ($post["count"] > $post["viewed_count"]) {
-                array_push($temp_array1, $post);
-            } else {
-                array_push($temp_array2, $post);
+                $temp_array1 = [];
+                $temp_array2 = [];
+                for ($i = 0; $i < sizeof($posts); $i++) {
+                    $post = $posts[$i];
+                    if ($post["count"] > $post["viewed_count"]) {
+                        array_push($temp_array1, $post);
+                    } else {
+                        array_push($temp_array2, $post);
+                    }
+                }
+                for ($j = 0; $j < sizeof($temp_array2); $j++) {
+                    array_push($temp_array1, $temp_array2[$j]);
+                }
+                return ['success' => true, 'dataJsonArray' => $posts];
             }
+            return ['success' => false, 'message' => 'missing params'];
         }
-        for ($j = 0; $j < sizeof($temp_array2); $j++) {
-            array_push($temp_array1, $temp_array2[$j]);
-        }
-
-//        return $temp_array1;
-//        return json_decode(json_encode($temp_array1), FALSE);
-        return $posts;
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetProUserPosts() {
@@ -1189,35 +1091,23 @@ FROM users
     }
 
     public function actionGetProUserPostsForProfile() {
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-
-        $posts = ProUserPosts::find()
-                ->select("pro_user_posts.*,users.fullname,users.profile_picture")
-                ->join('join', 'users', 'users.id = pro_user_posts.user_id')
-                ->where(['user_id' => $userId])
-                ->andWhere('creation_date >= now() - INTERVAL 1 DAY')
-                ->orderBy('creation_date DESC')
-                ->asArray()
-                ->all();
-
-//        $posts = (new Query)
-//                ->select("pro_user_posts.*,users.fullname,users.profile_picture,
-//                    COUNT(pro_user_posts.id) as count,
-//                    (SELECT COUNT(pro_user_posts_views.id) as count
-//                          FROM pro_user_posts_views
-//                          JOIN pro_user_posts  pup ON pup.id = pro_user_posts_views.pro_post_id
-//                          WHERE pro_user_posts_views.user_id = $userId  AND pup.user_id = pro_user_posts.user_id
-//                          ORDER BY pro_user_posts_views.creation_date DESC) as viewed_count")
-//                ->from("pro_user_posts")
-//                ->join('join', 'users', 'users.id = pro_user_posts.user_id')
-//                ->where('creation_date >= now() - INTERVAL 1 DAY')
-//                ->orderBy('creation_date DESC')
-//                ->all();
-
-
-        return $posts;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $posts = ProUserPosts::find()
+                        ->select("pro_user_posts.*,users.fullname,users.profile_picture")
+                        ->join('join', 'users', 'users.id = pro_user_posts.user_id')
+                        ->where(['user_id' => $userId])
+                        ->andWhere('creation_date >= now() - INTERVAL 1 DAY')
+                        ->orderBy('creation_date DESC')
+                        ->asArray()
+                        ->all();
+                return ['success' => true, 'dataJsonArray' => $posts];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionCreateProUserPost() {
@@ -1300,9 +1190,9 @@ FROM users
 
     public function actionSignup() {
         $post = Yii::$app->request->post();
-        
+
 //        if(isset($post["fullname"])&&isset($post["password"])&&isset($post["role"])){
-//            
+//
 //        }
 
         $fullname = $post["fullname"];
@@ -1416,76 +1306,82 @@ FROM users
 //    }
 
     public function actionAddComment() {
-        $post = Yii::$app->request->post();
-        $postId = $post["postId"];
-        $text = $post["text"];
-        $userId = $post["userId"];
 
-        $comment = new Comment();
-        $comment->r_room = $postId;
-        $comment->r_user = $userId;
-        $comment->c_text = $text;
-        if ($comment->save()) {
-            $userThatMakeComment = Users::findOne(["id" => $userId]);
-            $notification = new NotificationForm();
-            $notification->subject = $userThatMakeComment->fullname;
-            $notification->message = $text;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId']) && isset($_POST['postId']) && isset($_POST['text'])) {
+                $userId = $_POST["userId"];
+                $postId = $_POST["postId"];
+                $text = $_POST["text"];
 
-            $room = Rooms::findOne(["id" => $postId]);
-            $userRoomOwner = Users::findOne(["id" => $room->r_admin]);
+                $comment = new Comment();
+                $comment->r_room = $postId;
+                $comment->r_user = $userId;
+                $comment->c_text = $text;
+                if ($comment->save()) {
+                    $userThatMakeComment = Users::findOne(["id" => $userId]);
+                    $notification = new NotificationForm();
+                    $notification->subject = $userThatMakeComment->fullname;
+                    $notification->message = $text;
 
-            $firebaseTokenOfRoomOwner = $userRoomOwner->token;
-            $commentsUsers = Comment::find()
-                    ->select("DISTINCT(users.token)")
-                    ->where([
-                        "r_room" => $postId,
-                    ])
-                    ->andWhere("comment.r_user != $userRoomOwner->id")
-                    ->join("join", "users", "users.id = comment.r_user")
-                    ->asArray()
-                    ->column();
-            array_push($commentsUsers, $firebaseTokenOfRoomOwner);
+                    $room = Rooms::findOne(["id" => $postId]);
+                    $userRoomOwner = Users::findOne(["id" => $room->r_admin]);
 
-            // add to table notification
+                    $firebaseTokenOfRoomOwner = $userRoomOwner->token;
+                    $commentsUsers = Comment::find()
+                            ->select("DISTINCT(users.token)")
+                            ->where([
+                                "r_room" => $postId,
+                            ])
+                            ->andWhere("comment.r_user != $userRoomOwner->id")
+                            ->join("join", "users", "users.id = comment.r_user")
+                            ->asArray()
+                            ->column();
+                    array_push($commentsUsers, $firebaseTokenOfRoomOwner);
+
+                    // add to table notification
 
 
-            $myNotificationModel = new Notificaion();
-            $myNotificationModel->room_id = $postId;
-            $myNotificationModel->sender_id = $userId;
-            $myNotificationModel->reciever_id = $userRoomOwner->id;
-            $myNotificationModel->description = Constants::$COMMENTED_ON_YOUR_POST;
-            $myNotificationModel->save();
-            $commentsUsersIds = [];
-            if ($userRoomOwner->id != $userId) {
-                $commentsUsersIds = Comment::find()
-                        ->select("DISTINCT(users.id)")
-                        ->where([
-                            "r_room" => $postId,
-                        ])
-                        ->andWhere("comment.r_user != $userRoomOwner->id")
-                        ->join("join", "users", "users.id = comment.r_user")
-                        ->asArray()
-                        ->column();
-            }
-
-            for ($i = 0; $i < sizeof($commentsUsersIds); $i++) {
-                if ($userId != $commentsUsersIds[$i]) {
                     $myNotificationModel = new Notificaion();
                     $myNotificationModel->room_id = $postId;
                     $myNotificationModel->sender_id = $userId;
-                    $myNotificationModel->reciever_id = $commentsUsersIds[$i];
-                    $myNotificationModel->description = Constants::$COMMENTED_ON_A_POST_YOU_COMMENTED_IN;
+                    $myNotificationModel->reciever_id = $userRoomOwner->id;
+                    $myNotificationModel->description = Constants::$COMMENTED_ON_YOUR_POST;
                     $myNotificationModel->save();
+                    $commentsUsersIds = [];
+                    if ($userRoomOwner->id != $userId) {
+                        $commentsUsersIds = Comment::find()
+                                ->select("DISTINCT(users.id)")
+                                ->where([
+                                    "r_room" => $postId,
+                                ])
+                                ->andWhere("comment.r_user != $userRoomOwner->id")
+                                ->join("join", "users", "users.id = comment.r_user")
+                                ->asArray()
+                                ->column();
+                    }
+
+                    for ($i = 0; $i < sizeof($commentsUsersIds); $i++) {
+                        if ($userId != $commentsUsersIds[$i]) {
+                            $myNotificationModel = new Notificaion();
+                            $myNotificationModel->room_id = $postId;
+                            $myNotificationModel->sender_id = $userId;
+                            $myNotificationModel->reciever_id = $commentsUsersIds[$i];
+                            $myNotificationModel->description = Constants::$COMMENTED_ON_A_POST_YOU_COMMENTED_IN;
+                            $myNotificationModel->save();
+                        }
+                    }
+                    /////////////////////////////////////////
+
+                    $notification->notifyToUserGoToAd($commentsUsers, $postId);
+
+                    return ['success' => true];
                 }
+                return ['success' => false, 'message' => 'failed to add comments'];
             }
-            /////////////////////////////////////////
-
-            $notification->notifyToUserGoToAd($commentsUsers, $postId);
-
-            return "true";
-        } else {
-            return "false";
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionFollow() {
@@ -1618,7 +1514,6 @@ FROM users
 //
 ////        return ["room" => $room, "tokens" => $tokens, "notifications" => $userNotifications];
 //    }
-
 //    public function actionCheckIfHaveNotifications() {
 //
 //        $post = Yii::$app->request->post();
@@ -1692,20 +1587,24 @@ FROM users
     }
 
     public function actionGetCommentsByPost() {
-        $post = Yii::$app->request->post();
-        $postId = $post["postId"];
-
-        $commentsByPost = (new Query)
-                ->select(Comment::tableName() . ".*,users.fullname,users.profile_picture")
-                ->from(Comment::tableName())
-                ->where([
-                    "r_room" => $postId
-                ])
-                ->join("join", "users", Comment::tableName() . ".r_user = users.id")
-                ->orderBy("creation_date Desc")
-                ->all();
-
-        return $commentsByPost;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['postId'])) {
+                $postId = $_POST["postId"];
+                $commentsByPost = (new Query)
+                        ->select(Comment::tableName() . ".*,users.fullname,users.profile_picture")
+                        ->from(Comment::tableName())
+                        ->where([
+                            "r_room" => $postId
+                        ])
+                        ->join("join", "users", Comment::tableName() . ".r_user = users.id")
+                        ->orderBy("creation_date Desc")
+                        ->all();
+                return ['success' => true, 'dataJsonArray' => $commentsByPost];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetAdminNameAndLink() {
@@ -1774,129 +1673,83 @@ FROM users
     }
 
     public function actionUpdateProfile() {
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST["id"]) && isset($_POST["fullname"])) {
 
+                $id = $_POST["id"];
+                $fullname = $_POST["fullname"];
+                $linkFacebook = isset($_POST["linkFacebook"]) ? $_POST["linkFacebook"] : null;
+                $linkYoutube = isset($_POST["linkYoutube"]) ? $_POST["linkYoutube"] : null;
+                $linkInstagram = isset($_POST["linkInstagram"]) ? $_POST["linkInstagram"] : null;
+                $linkTiktok = isset($_POST["linkTiktok"]) ? $_POST["linkTiktok"] : null;
+                $tags = isset($_POST["tags"]) ? $_POST["tags"] : null;
+                $bio = isset($_POST["bio"]) ? $_POST["bio"] : null;
+                $userGames = isset($post["userGames"]) ? $post["userGames"] : null;
+                $userGamesDecode = $userGames != null ? json_decode($userGames) : [];
 
-
-        $post = Yii::$app->request->post();
-
-        $id = $post["id"];
-        $fullname = $post["fullname"];
-
-        $linkFacebook = $post["linkFacebook"];
-        $linkYoutube = $post["linkYoutube"];
-        $linkInstagram = $post["linkInstagram"];
-        $linkTiktok = $post["linkTiktok"];
-        $tags = $post["tags"];
-        $bio = $post["bio"];
-
-        $userGames = $post["userGames"];
-        $userGamesDecode = json_decode($userGames);
-
-//        if (isset($userGamesDecode[1]->game_account_id)) {
-//            return [
-//                "status" => "0",
-//                "message" => json_encode($userGamesDecode[1])
-//            ];
-//        } else {
-//            return [
-//                "status" => "0",
-//                "message" => json_encode($userGamesDecode[1])
-//            ];
-//        }
-
-
-        $model = Users::findOne(["id" => $id]);
-        if ($model) {
-            $model->fullname = $fullname;
-            $model->link_facebook = $linkFacebook;
-            $model->link_youtube = $linkYoutube;
-            $model->link_instagram = $linkInstagram;
-            $model->link_tiktok = $linkTiktok;
-            $model->bio = $bio;
-            $model->tags = $tags;
-
-            if ($model->save()) {
-
-                for ($i = 0; $i < sizeof($userGamesDecode); $i++) {
-                    $userGame = $userGamesDecode[$i];
-                    if (isset($userGame->game_account_id)) {
-                        if (isset($userGame->streamerGameId)) {
-                            $model = StreamerGames::findOne(["id" => $userGame->streamerGameId]);
-                            if ($model) {
-                                if ($userGame->game_account_id == "") {
-                                    $model->delete();
+                $model = Users::findOne(["id" => $id]);
+                if ($model) {
+                    $model->fullname = $fullname;
+                    $model->link_facebook = $linkFacebook;
+                    $model->link_youtube = $linkYoutube;
+                    $model->link_instagram = $linkInstagram;
+                    $model->link_tiktok = $linkTiktok;
+                    $model->bio = $bio;
+                    $model->tags = $tags;
+                    if ($model->save()) {
+                        for ($i = 0; $i < sizeof($userGamesDecode); $i++) {
+                            $userGame = $userGamesDecode[$i];
+                            if (isset($userGame->game_account_id)) {
+                                if (isset($userGame->streamerGameId)) {
+                                    $model = StreamerGames::findOne(["id" => $userGame->streamerGameId]);
+                                    if ($model) {
+                                        if ($userGame->game_account_id == "") {
+                                            $model->delete();
+                                        } else {
+                                            $model->user_id = $id;
+                                            $model->game_id = $userGame->game_id;
+                                            $model->game_account_id = $userGame->game_account_id;
+                                            if (!$model->save()) {
+                                                return ['success' => false, "message" => "error in updating games"];
+                                            }
+                                        }
+                                    }
+                                    return ["success" => "false", "message" => "does not exists"];
                                 } else {
-                                    $model->user_id = $id;
-                                    $model->game_id = $userGame->game_id;
-                                    $model->game_account_id = $userGame->game_account_id;
-                                    if ($model->save()) {
-
-                                    } else {
-                                        return [
-                                            "status" => "0",
-                                            "message" => "error in updating games"
-                                        ];
+                                    if ($userGame->game_account_id != "") {
+                                        $model = new StreamerGames();
+                                        $model->user_id = $id;
+                                        $model->game_id = $userGame->id;
+                                        $model->game_account_id = $userGame->game_account_id;
+                                        if (!$model->save()) {
+                                            return [
+                                                "success" => "false", "message" => "error in saving games"];
+                                        }
                                     }
                                 }
                             } else {
-                                return [
-                                    "status" => "0",
-                                    "message" => "does not exists"
-                                ];
-                            }
-                        } else {
-                            if ($userGame->game_account_id != "") {
-                                $model = new StreamerGames();
-                                $model->user_id = $id;
-                                $model->game_id = $userGame->id;
-                                $model->game_account_id = $userGame->game_account_id;
-                                if ($model->save()) {
-
-                                } else {
-                                    return [
-                                        "status" => "0",
-                                        "message" => "error in saving games"
-                                    ];
+                                if (isset($userGame->id)) {
+                                    $model = StreamerGames::findOne([
+                                                "user_id" => $id,
+                                                "game_id" => $userGame->id
+                                    ]);
+                                    if ($model) {
+                                        $model->delete();
+                                    }
                                 }
-                            } else {
-
                             }
                         }
-                    } else {
-
-
-
-
-                        if (isset($userGame->id)) {
-
-                            $model = StreamerGames::findOne([
-                                        "user_id" => $id,
-                                        "game_id" => $userGame->id
-                            ]);
-                            if ($model) {
-                                $model->delete();
-                            }
-                        }
+                        return ["success" => "true", "message" => "success"];
                     }
+                    return ["success" => "false", "message" => "error in saving data", 'data' => $model->errors];
                 }
 
-                return [
-                    "status" => "1",
-                    "message" => "success"
-                ];
-            } else {
-                return [
-                    "status" => "0",
-                    "message" => "error in saving data"
-                ];
+                return ["success" => "false", "message" => "no user exist"];
             }
-        } else {
-
-            return [
-                "status" => "0",
-                "message" => "no user exist"
-            ];
+            return ["success" => "false", "message" => "missing params"];
         }
+        return ['success' => false, 'message' => 'unathorized'];
     }
 
     public function actionFollowStreamer() {
@@ -1953,7 +1806,6 @@ FROM users
 //            return $reward->errors;
 //        }
 //    }
-
 //    public function actionCheckSpin() {
 //
 //        $post = Yii::$app->request->post();
@@ -2082,30 +1934,28 @@ FROM users
     }
 
     public function actionGetProfileData() {
-        $post = Yii::$app->request->post();
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $userProfile = Users::find()
+                        ->select("username,fullname,role,link_facebook,link_youtube,link_instagram,link_tiktok,profile_picture,tags,bio")
+                        ->where(['id' => $userId])
+                        ->asArray()
+                        ->one();
 
-        $userId = $post["userId"];
-//        $userId = 13;
-        $userProfile = Users::find()
-                ->select("username,fullname,role,link_facebook,link_youtube,link_instagram,link_tiktok,profile_picture,tags,bio")
-                ->where(['id' => $userId])
-                ->asArray()
-                ->one();
+                $games = (new Query)
+                        ->select("games.id,games.name,streamer_games.user_id,streamer_games.game_id,streamer_games.game_account_id,streamer_games.id as streamerGameId")
+                        ->from("games")
+                        ->leftJoin("streamer_games", "games.id = streamer_games.game_id AND streamer_games.user_id = '" . $userId . "'")
+                        ->all();
 
-        $games = (new Query)
-                ->select("games.id,games.name,streamer_games.user_id,streamer_games.game_id,streamer_games.game_account_id,streamer_games.id as streamerGameId")
-                ->from("games")
-                ->leftJoin("streamer_games", "games.id = streamer_games.game_id AND streamer_games.user_id = '" . $userId . "'")
-                ->all();
-
-        $userProfile["userGame"] = $games;
-
-//        \yii\helpers\VarDumper::dump($userProfile, 10, true);
-//
-//          $post = Yii::$app->request->post();
-//        die();
-
-        return $userProfile;
+                $userProfile["userGame"] = $games;
+                return ['success' => true, 'data' => $userProfile];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetPostData() {
@@ -2123,59 +1973,62 @@ FROM users
     }
 
     public function actionGetProfileDataWithFollowers() {
-        $post = Yii::$app->request->post();
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST["userId"]) && isset($_POST["visitorId"])) {
+                $userId = $_POST["userId"];
+                $visitorId = $_POST["visitorId"];
 
-        $userId = $post["userId"];
-        $visitorId = $post["visitorId"];
-//        $userId = 13;
-        $userProfile = Users::find()
-                ->select("username,fullname,role,link_facebook,link_youtube,link_instagram,link_tiktok,profile_picture,address,email,phone,gender,coins,tags,bio")
-                ->where(['id' => $userId])
-                ->asArray()
-                ->one();
+                $userProfile = Users::find()
+                        ->select("username,fullname,role,link_facebook,link_youtube,link_instagram,link_tiktok,profile_picture,address,email,phone,gender,coins,tags,bio")
+                        ->where(['id' => $userId])
+                        ->asArray()
+                        ->one();
 
-        $games = (new Query)
-                ->select("games.id,games.name,streamer_games.user_id,streamer_games.game_id,streamer_games.game_account_id,streamer_games.id as streamerGameId")
-                ->from("games")
-                ->leftJoin("streamer_games", "games.id = streamer_games.game_id AND streamer_games.user_id = '" . $userId . "'")
-                ->all();
+                $games = (new Query)
+                        ->select("games.id,games.name,streamer_games.user_id,streamer_games.game_id,streamer_games.game_account_id,streamer_games.id as streamerGameId")
+                        ->from("games")
+                        ->leftJoin("streamer_games", "games.id = streamer_games.game_id AND streamer_games.user_id = '" . $userId . "'")
+                        ->all();
 
-        $userProfile["userGame"] = $games;
-//        \yii\helpers\VarDumper::dump($userProfile, 10, true);
+                $userProfile["userGame"] = $games;
 //
-//          $post = Yii::$app->request->post();
-        $following = Follow::find()
-                ->where(['r_user' => $visitorId])
-                ->andWhere(['r_page' => $userId])
-                ->one();
-        if ($following) {
-            $userProfile["following"] = 1;
-        } else {
-            $userProfile["following"] = 0;
+                $following = Follow::find()
+                        ->where(['r_user' => $visitorId])
+                        ->andWhere(['r_page' => $userId])
+                        ->one();
+                if ($following) {
+                    $userProfile["following"] = 1;
+                } else {
+                    $userProfile["following"] = 0;
+                }
+                $countposts = Rooms::find()
+                        ->where(['r_admin' => $userId])
+                        ->all();
+
+                $userProfile["numberOfPosts"] = sizeof($countposts);
+
+                $count = Follow::find()
+                        ->where(['r_page' => $userId])
+                        ->asArray()
+                        ->all();
+
+                $userProfile["numberOfFollowers"] = sizeof($count);
+
+                $userNotifications = UserNotifications::find()
+                                ->where(['user_id' => $userId])->one();
+
+                if ($userNotifications) {
+                    $userProfile["userNotifications"] = $userNotifications;
+                } else {
+                    $userProfile["userNotifications"] = null;
+                }
+
+                return ['success' => true, 'data' => $userProfile];
+            }
+            return ['success' => false, 'message' => 'missing params'];
         }
-        $countposts = Rooms::find()
-                ->where(['r_admin' => $userId])
-                ->all();
-
-        $userProfile["numberOfPosts"] = sizeof($countposts);
-
-        $count = Follow::find()
-                ->where(['r_page' => $userId])
-                ->asArray()
-                ->all();
-
-        $userProfile["numberOfFollowers"] = sizeof($count);
-
-        $userNotifications = UserNotifications::find()
-                        ->where(['user_id' => $userId])->one();
-
-        if ($userNotifications) {
-            $userProfile["userNotifications"] = $userNotifications;
-        } else {
-            $userProfile["userNotifications"] = null;
-        }
-
-        return $userProfile;
+        return ['success' => false, 'message' => 'unathorized'];
     }
 
     public function actionGetGames() {
@@ -2532,21 +2385,25 @@ FROM users
     }
 
     public function actionUpdateToken() {
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-        $token = $post["token"];
-
-        $user = Users::findOne(["id" => $userId]);
-        if ($user) {
-            $user->token = $token;
-            if ($user->save()) {
-                return ['success' => true, 'message' => 'success'];
-            } else {
-                return ['success' => false, 'message' => $user->getErrors()];
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId']) && isset($_POST['token'])) {
+                $userId = $_POST["userId"];
+                $token = $_POST["token"];
+                $user = Users::findOne(["id" => $userId]);
+                if ($user) {
+                    $user->token = $token;
+                    if ($user->save()) {
+                        return ['success' => true, 'message' => 'success'];
+                    } else {
+                        return ['success' => false, 'message' => $user->getErrors()];
+                    }
+                }
+                return ['success' => false, 'message' => 'user not exist'];
             }
+            return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'no user found'];
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
 //    public function actionSs() {
