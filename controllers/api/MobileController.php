@@ -332,7 +332,7 @@ class MobileController extends ApiController {
                             $postFiles->post_id = $room->primaryKey;
                             $postFiles->file_name = $randomFileName;
                             if ($postFiles->save()) {
-                                //for image
+//for image
                                 $location = "postPictures/";
                                 $uploads_dir = $location;
                                 $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
@@ -345,12 +345,12 @@ class MobileController extends ApiController {
                                 $newheight = $height * $percent;
                                 $thumb = imagecreatetruecolor($newwidth, $newheight);
                                 header('Content-type: image/jpeg');
-                                // Resize
+// Resize
                                 imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
-                                // Output
+// Output
 //                    imagejpeg($im, $uploads_dir . $imageName);
                                 imagejpeg($thumb, $uploads_dir . $imageName);
-                                //save record to database table
+//save record to database table
                                 $room = Rooms::findOne(["id" => $room->primaryKey]);
                                 $room->video_thumbnail = $imageName;
                                 if ($room->save()) {
@@ -359,7 +359,7 @@ class MobileController extends ApiController {
 //                            return $postFiles->getErrors();
                                 }
 //                        return "good post only saved";
-                                //////
+//////
                             } else {
                                 return ['success' => false, 'data' => $postFiles->getErrors()];
                             }
@@ -377,7 +377,9 @@ class MobileController extends ApiController {
                     $imagesSize = $post["imagesSize"];
                     $location = "postPictures/";
                     if ($room->save()) {
-                        for ($i = 0; $i < $imagesSize; $i++) {
+                        for ($i = 0;
+                                $i < $imagesSize;
+                                $i++) {
                             $image = $post["image" . ($i + 1)];
                             $uploads_dir = $location;
                             $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
@@ -391,14 +393,14 @@ class MobileController extends ApiController {
                                 $newheight = $height * $percent;
                                 $thumb = imagecreatetruecolor($newwidth, $newheight);
                                 header('Content-type: image/jpeg');
-                                // Resize
+// Resize
                                 imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
-                                // Output
+// Output
 //                    imagejpeg($im, $uploads_dir . $imageName);
                                 imagejpeg($thumb, $uploads_dir . $imageName);
 
-                                //save record to database table
+//save record to database table
                                 $postFiles = new PostFiles();
                                 $postFiles->post_id = $room->primaryKey;
                                 $postFiles->file_name = $imageName;
@@ -568,7 +570,7 @@ class MobileController extends ApiController {
                     $challenge->streamer_id = $streamerId;
                     $challenge->file_name = $randomFileName;
                     if ($challenge->save()) {
-                        //for image
+//for image
                         $location = "postChallengesFiles/";
                         $uploads_dir = $location;
                         $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
@@ -583,14 +585,14 @@ class MobileController extends ApiController {
                         $newheight = $height * $percent;
                         $thumb = imagecreatetruecolor($newwidth, $newheight);
                         header('Content-type: image/jpeg');
-                        // Resize
+// Resize
                         imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
-                        // Output
+// Output
 //                    imagejpeg($im, $uploads_dir . $imageName);
                         imagejpeg($thumb, $uploads_dir . $imageName);
 
-                        //save record to database table
+//save record to database table
                         $challenge = ChallengesVideos::findOne(["id" => $challenge->primaryKey]);
                         $challenge->thumbnail = $imageName;
                         if ($challenge->save()) {
@@ -658,7 +660,9 @@ class MobileController extends ApiController {
              ORDER BY rooms.creation_date DESC;";
                 $command = Yii::$app->db->createCommand($sql);
                 $arrayList = $command->queryAll();
-                for ($i = 0; $i < sizeof($arrayList); $i++) {
+                for ($i = 0;
+                        $i < sizeof($arrayList);
+                        $i++) {
                     $item = $arrayList[$i];
                     if ($item["category"] == "challenge") {
                         if ($item["accept1"] == 0 && $item["accept2"] == 0 && $item["accept3"] == 0) {
@@ -784,16 +788,15 @@ class MobileController extends ApiController {
 
     public function actionGetPostsBySearch() {
 
-        $post = Yii::$app->request->post();
-        $searchText = $post["searchText"];
-        $userId = $post["userId"];
-        $searchText = "'%" . $searchText . "%'";
 
-//        $rooms = Rooms::find()
-//                ->where(['r_admin' => $userId])
-//                ->all();
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId']) && isset($_POST["searchText"])) {
+                $userId = $_POST["userId"];
+                $searchText = $_POST["searchText"];
+                $searchText = "'%" . $searchText . "%'";
 
-        $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
+                $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
             (SELECT COUNT(id) FROM followrooms WHERE r_room = rooms.id) as number_of_likes,type,
             (SELECT GROUP_CONCAT(file_name SEPARATOR ',') FROM post_files WHERE post_id = rooms.id) as files,
             (SELECT COUNT(id) FROM comment WHERE r_room = rooms.id) as number_of_comments,
@@ -803,27 +806,24 @@ class MobileController extends ApiController {
              LEFT JOIN followrooms ON followrooms.r_room = rooms.id AND followrooms.r_user = $userId
              WHERE  rooms.c_text like $searchText OR rooms.title like $searchText Or users.fullname like $searchText;";
 
-        $command = Yii::$app->db->createCommand($sql);
-        $arrayList = $command->queryAll();
+                $command = Yii::$app->db->createCommand($sql);
+                $arrayList = $command->queryAll();
 
-        return $arrayList;
+                return ['success' => true, 'dataJsonArray' => $arrayList];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetUsersBySearch() {
-
-        $post = Yii::$app->request->post();
-        $searchText = $post["searchText"];
-        $userId = $post["userId"];
-        $searchText = "'%" . $searchText . "%'";
-
-//        $rooms = Rooms::find()
-//                ->where(['r_admin' => $userId])
-//                ->all();
-
-
-
-
-        $sql = "
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId']) && isset($_POST["searchText"])) {
+                $userId = $_POST["userId"];
+                $searchText = $_POST["searchText"];
+                $searchText = "'%" . $searchText . "%'";
+                $sql = "
              SELECT   users.*,
        (SELECT COUNT(*) FROM follow
         WHERE users.id = follow.r_page) AS followers,follow.r_page as followed
@@ -831,10 +831,14 @@ FROM users
  LEFT JOIN follow ON follow.r_page = users.id AND follow.r_user = $userId
    WHERE  LOWER(users.fullname) like LOWER($searchText) ;";
 
-        $command = Yii::$app->db->createCommand($sql);
-        $arrayList = $command->queryAll();
+                $command = Yii::$app->db->createCommand($sql);
+                $arrayList = $command->queryAll();
 
-        return $arrayList;
+                return ['success' => true, 'dataJsonArray' => $arrayList];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetMyChallenges() {
@@ -882,7 +886,9 @@ FROM users
 
                 $command = Yii::$app->db->createCommand($sql);
                 $arrayList = $command->queryAll();
-                for ($i = 0; $i < sizeof($arrayList); $i++) {
+                for ($i = 0;
+                        $i < sizeof($arrayList);
+                        $i++) {
                     $item = $arrayList[$i];
                     if ($item["category"] == "challenge") {
                         if ($item["accept1"] == 0 && $item["accept2"] == 0 && $item["accept3"] == 0) {
@@ -1041,7 +1047,9 @@ FROM users
 
                 $temp_array1 = [];
                 $temp_array2 = [];
-                for ($i = 0; $i < sizeof($posts); $i++) {
+                for ($i = 0;
+                        $i < sizeof($posts);
+                        $i++) {
                     $post = $posts[$i];
                     if ($post["count"] > $post["viewed_count"]) {
                         array_push($temp_array1, $post);
@@ -1049,7 +1057,9 @@ FROM users
                         array_push($temp_array2, $post);
                     }
                 }
-                for ($j = 0; $j < sizeof($temp_array2); $j++) {
+                for ($j = 0;
+                        $j < sizeof($temp_array2);
+                        $j++) {
                     array_push($temp_array1, $temp_array2[$j]);
                 }
                 return ['success' => true, 'dataJsonArray' => $posts];
@@ -1128,7 +1138,7 @@ FROM users
             if ($proUserPost->save()) {
 
                 $imageString = $post["imageString"];
-                //for image
+//for image
                 $location = "postPictures/";
                 $uploads_dir = $location;
                 $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
@@ -1143,13 +1153,13 @@ FROM users
                 $newheight = $height * $percent;
                 $thumb = imagecreatetruecolor($newwidth, $newheight);
                 header('Content-type: image/jpeg');
-                // Resize
+// Resize
                 imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
-                // Output
+// Output
 //                    imagejpeg($im, $uploads_dir . $imageName);
                 imagejpeg($thumb, $uploads_dir . $imageName);
 
-                //save record to database table
+//save record to database table
                 $proUserPost = ProUserPosts::findOne(["id" => $proUserPost->primaryKey]);
                 $proUserPost->image = $imageName;
 
@@ -1234,7 +1244,9 @@ FROM users
         $user->link_tiktok = $linkTiktok;
 
         if ($user->save()) {
-            for ($i = 0; $i < sizeof($userGamesDecode); $i++) {
+            for ($i = 0;
+                    $i < sizeof($userGamesDecode);
+                    $i++) {
                 $userGame = $userGamesDecode[$i];
                 $model = new StreamerGames();
                 $model->user_id = $user->id;
@@ -1339,7 +1351,7 @@ FROM users
                             ->column();
                     array_push($commentsUsers, $firebaseTokenOfRoomOwner);
 
-                    // add to table notification
+// add to table notification
 
 
                     $myNotificationModel = new Notificaion();
@@ -1361,7 +1373,9 @@ FROM users
                                 ->column();
                     }
 
-                    for ($i = 0; $i < sizeof($commentsUsersIds); $i++) {
+                    for ($i = 0;
+                            $i < sizeof($commentsUsersIds);
+                            $i++) {
                         if ($userId != $commentsUsersIds[$i]) {
                             $myNotificationModel = new Notificaion();
                             $myNotificationModel->room_id = $postId;
@@ -1371,7 +1385,7 @@ FROM users
                             $myNotificationModel->save();
                         }
                     }
-                    /////////////////////////////////////////
+/////////////////////////////////////////
 
                     $notification->notifyToUserGoToAd($commentsUsers, $postId);
 
@@ -1385,48 +1399,50 @@ FROM users
     }
 
     public function actionFollow() {
-        $post = Yii::$app->request->post();
-        $roomId = $post["r_room"];
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['r_room']) && isset($_POST['r_user']) && isset($_POST['token'])) {
+                $roomId = $_POST["r_room"];
+                $userId = $_POST["r_user"];
+                $token = $_POST["token"];
+                $follow = new Followrooms();
+                $follow->r_room = $roomId;
+                $follow->r_user = $userId;
+                $follow->user_token = $token;
+                if ($follow->save()) {
 
-        $userId = $post["r_user"];
-        $token = $post["token"];
+                    $room = Rooms::findOne(["id" => $roomId]);
+                    if ($room) {
 
-        $follow = new Followrooms();
-        $follow->r_room = $roomId;
-        $follow->r_user = $userId;
-        $follow->user_token = $token;
+                        $myNotificationModel = new Notificaion();
+                        $myNotificationModel->room_id = $room["id"];
+                        $myNotificationModel->sender_id = $userId;
+                        $myNotificationModel->reciever_id = $room["r_admin"];
+                        $myNotificationModel->description = Constants::$LIKED_YOUR_POST;
+                        $myNotificationModel->save();
 
-        if ($follow->save()) {
+                        $user = Users::findOne(["id" => $userId]);
 
-            $room = Rooms::findOne(["id" => $roomId]);
-            if ($room) {
+                        $senderName = "";
+                        if ($user) {
+                            $senderName = $user->fullname;
+                        }
 
-                $myNotificationModel = new Notificaion();
-                $myNotificationModel->room_id = $room["id"];
-                $myNotificationModel->sender_id = $userId;
-                $myNotificationModel->reciever_id = $room["r_admin"];
-                $myNotificationModel->description = Constants::$LIKED_YOUR_POST;
-                $myNotificationModel->save();
+                        $notification = new NotificationForm();
+                        $notification->subject = $senderName;
+                        $notification->message = Constants::$LIKED_YOUR_POST;
+                        $notification->notifyToUserGoToAd([$user->token], $room["id"]);
+                    }
 
-                $user = Users::findOne(["id" => $userId]);
 
-                $senderName = "";
-                if ($user) {
-                    $senderName = $user->fullname;
+
+                    return ['success' => true];
                 }
-
-                $notification = new NotificationForm();
-                $notification->subject = $senderName;
-                $notification->message = Constants::$LIKED_YOUR_POST;
-                $notification->notifyToUserGoToAd([$user->token], $room["id"]);
+                return ['success' => true, 'data' => $follow->errors];
             }
-
-
-
-            return true;
-        } else {
-            return $follow->errors;
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
 //    public function actionSendNotificationMyUsers() {
@@ -1553,21 +1569,23 @@ FROM users
 //    }
 
     public function actionUnfollow() {
-        $post = Yii::$app->request->post();
-        $roomId = $post["r_room"];
-
-        $userId = $post["r_user"];
-
-        $unfollow = Followrooms::find()
-                ->where(["r_room" => $roomId])
-                ->andWhere(["r_user" => $userId])
-                ->one();
-
-        if ($unfollow->delete()) {
-            return true;
-        } else {
-            return false;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['r_user']) && isset($_POST['r_room'])) {
+                $roomId = $_POST["r_room"];
+                $userId = $_POST["r_user"];
+                $unfollow = Followrooms::find()
+                        ->where(["r_room" => $roomId])
+                        ->andWhere(["r_user" => $userId])
+                        ->one();
+                if ($unfollow->delete()) {
+                    return ['success' => true];
+                }
+                return ['success' => false];
+            }
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionChecked() {
@@ -1698,7 +1716,9 @@ FROM users
                     $model->bio = $bio;
                     $model->tags = $tags;
                     if ($model->save()) {
-                        for ($i = 0; $i < sizeof($userGamesDecode); $i++) {
+                        for ($i = 0;
+                                $i < sizeof($userGamesDecode);
+                                $i++) {
                             $userGame = $userGamesDecode[$i];
                             if (isset($userGame->game_account_id)) {
                                 if (isset($userGame->streamerGameId)) {
@@ -1754,39 +1774,37 @@ FROM users
 
     public function actionFollowStreamer() {
 
-        $post = Yii::$app->request->post();
-
-        $r_user = $post["r_user"];
-        $r_page = $post["r_page"];
-        $follow = new Follow();
-        $follow->r_user = $r_user;
-        $follow->r_page = $r_page;
-
-        if ($follow->save()) {
-
-
-            $myNotificationModel = new Notificaion();
-            $myNotificationModel->sender_id = $r_user;
-            $myNotificationModel->reciever_id = $r_page;
-            $myNotificationModel->description = Constants::$FOLLOWED_YOU;
-            $myNotificationModel->save();
-
-            $user = Users::findOne(["id" => $r_user]);
-
-            $senderName = "";
-            if ($user) {
-                $senderName = $user->fullname;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['r_user']) && isset($_POST["r_page"])) {
+                $r_user = $_POST["r_user"];
+                $r_page = $_POST["r_page"];
+                $follow = new Follow();
+                $follow->r_user = $r_user;
+                $follow->r_page = $r_page;
+                if ($follow->save()) {
+                    $myNotificationModel = new Notificaion();
+                    $myNotificationModel->sender_id = $r_user;
+                    $myNotificationModel->reciever_id = $r_page;
+                    $myNotificationModel->description = Constants::$FOLLOWED_YOU;
+                    $myNotificationModel->save();
+                    $user = Users::findOne(["id" => $r_user]);
+                    $senderName = "";
+                    if ($user) {
+                        $senderName = $user->fullname;
+                    }
+                    $notification = new NotificationForm();
+                    $notification->subject = $senderName;
+                    $notification->message = Constants::$FOLLOWED_YOU;
+                    $notification->notifyToUserGoToAd([$user->token], 0);
+                    return ['success' => true];
+                } else {
+                    return ['success' => false, 'data' => $follow->errors];
+                }
             }
-
-            $notification = new NotificationForm();
-            $notification->subject = $senderName;
-            $notification->message = Constants::$FOLLOWED_YOU;
-            $notification->notifyToUserGoToAd([$user->token], 0);
-
-            return true;
-        } else {
-            return $follow->errors;
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
 //    public function actionSliverSpinReward() {
@@ -1843,21 +1861,24 @@ FROM users
 //    }
 
     public function actionUnfollowStreamer() {
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['r_user']) && isset($_POST['r_page'])) {
+                $r_user = $_POST["r_user"];
+                $r_page = $_POST["r_page"];
+                $follow = Follow::find()
+                        ->where(['r_user' => $r_user])
+                        ->andWhere(['r_page' => $r_page])
+                        ->one();
 
-        $post = Yii::$app->request->post();
-
-        $r_user = $post["r_user"];
-        $r_page = $post["r_page"];
-        $follow = Follow::find()
-                ->where(['r_user' => $r_user])
-                ->andWhere(['r_page' => $r_page])
-                ->one();
-
-        if ($follow->delete()) {
-            return true;
-        } else {
-            return $follow->errors;
+                if ($follow->delete()) {
+                    return ['success' => true];
+                }
+                return ['success' => false, 'data' => $follow->errors];
+            }
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetNumberOfFollowers() {
@@ -2032,13 +2053,15 @@ FROM users
     }
 
     public function actionGetGames() {
-
-        $games = (new Query)
-                ->select("*")
-                ->from("games")
-                ->all();
-
-        return $games;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            $games = (new Query)
+                    ->select("*")
+                    ->from("games")
+                    ->all();
+            return ['success' => true, 'dataJsonArray' => $games];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionHandlePurchase() {
@@ -2441,7 +2464,7 @@ FROM users
 ////
 ////        $headers = array
 ////            (
-////            'Authorization: key=AAAAOSRyA4w:APA91bGpPImQQPQTgvZQdL8qe7QbF1khXBJxe1QO8TiuC6brGSoDEDVuuObrJqqpGHFWL4bC9378DbBWWOuN-HJ4T8McJQBauctM58-lfcPB5iA9l8NgebBi7Vm4BLemyFoRGBHNQUub',
+////            'Authorization: key = AAAAOSRyA4w:APA91bGpPImQQPQTgvZQdL8qe7QbF1khXBJxe1QO8TiuC6brGSoDEDVuuObrJqqpGHFWL4bC9378DbBWWOuN-HJ4T8McJQBauctM58-lfcPB5iA9l8NgebBi7Vm4BLemyFoRGBHNQUub',
 ////            'Content-Type: application/json'
 ////        );
 ////        $ch = curl_init();
@@ -2457,25 +2480,26 @@ FROM users
 //    }
 
     public function actionGetNotificationsByUser() {
-
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-
-        $notifications = Notificaion::find()
-                ->select(["notificaion.*", "senderUser.fullname as senderFullname", "senderUser.profile_picture as senderProfilePicture"])
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $notifications = Notificaion::find()
+                        ->select(["notificaion.*", "senderUser.fullname as senderFullname", "senderUser.profile_picture as senderProfilePicture"])
 //                ->join('join', 'users as recieverUser', 'recieverUser.id = notificaion.reciever_id')
-                ->join('join', 'users as senderUser', 'senderUser.id = notificaion.sender_id')
-                ->where(['reciever_id' => $userId])
-                ->orderBy("id DESC")
-                ->asArray()
-                ->all();
-
-        Notificaion::updateAll(["is_read" => 1], [
-            "reciever_id" => $userId
-        ]);
-
-        return $notifications;
+                        ->join('join', 'users as senderUser', 'senderUser.id = notificaion.sender_id')
+                        ->where(['reciever_id' => $userId])
+                        ->orderBy("id DESC")
+                        ->asArray()
+                        ->all();
+                Notificaion::updateAll(["is_read" => 1], [
+                    "reciever_id" => $userId
+                ]);
+                return ['success' => true, 'dataJsonArray' => $notifications];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetUnreadNotificationNumber() {
