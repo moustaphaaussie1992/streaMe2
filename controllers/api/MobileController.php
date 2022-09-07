@@ -40,14 +40,19 @@ class MobileController extends ApiController {
     }
 
     public function actionGetCoins() {
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-        $user = Users::findOne([
-                    'id' => $userId,
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $user = Users::findOne([
+                            'id' => $userId,
 //                    'role' => $role
-        ]);
-
-        return $user->coins;
+                ]);
+                return ['success' => true, 'message' => $user->coins];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
 //    public function actionChallengeCheck() {
@@ -186,68 +191,66 @@ class MobileController extends ApiController {
 //    }
 
     public function actionMakeDonation() {
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
-        $donatorId = $post["donatorId"];
-        $coins = $post["coins"];
-        $roomId = $post["roomId"];
-        $user = Users::findOne([
-                    'id' => $userId,
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId']) && isset($_POST['donatorId']) && isset($_POST['coins']) && isset($_POST['roomId'])) {
+                $userId = $_POST["userId"];
+                $donatorId = $_POST["donatorId"];
+                $coins = $_POST["coins"];
+                $roomId = $_POST["roomId"];
+                $user = Users::findOne([
+                            'id' => $userId,
 //                    'role' => $role
-        ]);
-        $donator = Users::findOne([
-                    'id' => $donatorId,
+                ]);
+                $donator = Users::findOne([
+                            'id' => $donatorId,
 //                    'role' => $role
-        ]);
+                ]);
 
-        if ($donator->coins > $coins) {
+                if ($donator->coins > $coins) {
 
-            $donation = new UserTransactions();
-            $donation->userId = $userId;
-            $donation->fromUser = $donatorId;
-            $donation->coins = $coins;
-            $donation->type = "donation";
-            $donation->roomId = $roomId;
-            $donator->coins = $donator->coins - $coins;
-            $user->coins = $user->coins + $coins;
+                    $donation = new UserTransactions();
+                    $donation->userId = $userId;
+                    $donation->fromUser = $donatorId;
+                    $donation->coins = $coins;
+                    $donation->type = "donation";
+                    $donation->roomId = $roomId;
+                    $donator->coins = $donator->coins - $coins;
+                    $user->coins = $user->coins + $coins;
+                    if ($donation->save()) {
+                        if ($user->save()) {
+                            if ($donator->save()) {
+                                $myNotificationModel = new Notificaion();
+                                $myNotificationModel->room_id = $roomId;
+                                $myNotificationModel->sender_id = $donatorId;
+                                $myNotificationModel->reciever_id = $userId;
+                                $myNotificationModel->description = Constants::$MADE_A_DONATION_TO_YOU;
+                                $myNotificationModel->save();
 
-            if ($donation->save()) {
+                                $user = Users::findOne(["id" => $userId]);
 
-                if ($user->save()) {
-                    if ($donator->save()) {
+                                $senderName = "";
+                                if ($donator) {
+                                    $senderName = $donator->fullname;
+                                }
 
-                        $myNotificationModel = new Notificaion();
-                        $myNotificationModel->room_id = $roomId;
-                        $myNotificationModel->sender_id = $donatorId;
-                        $myNotificationModel->reciever_id = $userId;
-                        $myNotificationModel->description = Constants::$MADE_A_DONATION_TO_YOU;
-                        $myNotificationModel->save();
-
-                        $user = Users::findOne(["id" => $userId]);
-
-                        $senderName = "";
-                        if ($donator) {
-                            $senderName = $donator->fullname;
+                                $notification = new NotificationForm();
+                                $notification->subject = $senderName;
+                                $notification->message = Constants::$MADE_A_DONATION_TO_YOU;
+                                $notification->notifyToUserGoToAd([$user->token], $roomId);
+                                return ['success' => true, 'message' => $donator->coins];
+                            }
+                            return ['success' => true, 'message' => 'd', 'data' => $donator->errors];
                         }
-
-                        $notification = new NotificationForm();
-                        $notification->subject = $senderName;
-                        $notification->message = Constants::$MADE_A_DONATION_TO_YOU;
-                        $notification->notifyToUserGoToAd([$user->token], $roomId);
-
-                        return $donator->coins;
-                    } else {
-
-                        return "d";
+                        return ['success' => false, 'message' => 'u', 'data' => $user->errors];
                     }
-                } else {
-
-                    return "u";
+                    return ['success' => false, 'data' => $donation->errors];
                 }
-            } else {
-                return $donation->errors;
+                return ['success' => false, 'message' => 'donator coins lessthan coins'];
             }
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionCreateRoom() {
@@ -548,71 +551,77 @@ class MobileController extends ApiController {
     }
 
     public function actionAddChallengeVideo() {
-        $post = Yii::$app->request->post();
-        $postId = $post["postId"];
-        $streamerId = $post["streamerId"];
-        $imageString = $post["imageString"];
 
-        $file_name = $_FILES['myFile']['name'];
-        $ext = pathinfo($file_name, PATHINFO_EXTENSION);
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['postId']) && isset($_POST['streamerId']) && isset($_POST['imageString'])) {
+                $postId = $post["postId"];
+                $streamerId = $post["streamerId"];
+                $imageString = $post["imageString"];
+
+                $file_name = $_FILES['myFile']['name'];
+                $ext = pathinfo($file_name, PATHINFO_EXTENSION);
 //            $file_size = $_FILES['myFile']['size'];
 //            $file_type = $_FILES['myFile']['type'];
-        $temp_name = $_FILES['myFile']['tmp_name'];
-        $randomFileName = Yii::$app->security->generateRandomString() . "." . $ext;
-        $location = "postChallengesFiles/";
-        $isPost = Rooms::findOne(["id" => $postId]);
-        $isStreamer = Users::findOne(["id" => $streamerId]);
-        if ($isPost) {
-            if ($isStreamer) {
-                if (move_uploaded_file($temp_name, $location . $randomFileName)) {
-                    $challenge = new ChallengesVideos();
-                    $challenge->post_id = $postId;
-                    $challenge->streamer_id = $streamerId;
-                    $challenge->file_name = $randomFileName;
-                    if ($challenge->save()) {
+                $temp_name = $_FILES['myFile']['tmp_name'];
+                $randomFileName = Yii::$app->security->generateRandomString() . "." . $ext;
+                $location = "postChallengesFiles/";
+                $isPost = Rooms::findOne(["id" => $postId]);
+                $isStreamer = Users::findOne(["id" => $streamerId]);
+                if ($isPost) {
+                    if ($isStreamer) {
+                        if (move_uploaded_file($temp_name, $location . $randomFileName)) {
+                            $challenge = new ChallengesVideos();
+                            $challenge->post_id = $postId;
+                            $challenge->streamer_id = $streamerId;
+                            $challenge->file_name = $randomFileName;
+                            if ($challenge->save()) {
 //for image
-                        $location = "postChallengesFiles/";
-                        $uploads_dir = $location;
-                        $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
-                        $percent = 1;
+                                $location = "postChallengesFiles/";
+                                $uploads_dir = $location;
+                                $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
+                                $percent = 1;
 
-                        $data = base64_decode($imageString);
+                                $data = base64_decode($imageString);
 
-                        $im = imagecreatefromstring($data);
-                        $width = imagesx($im);
-                        $height = imagesy($im);
-                        $newwidth = $width * $percent;
-                        $newheight = $height * $percent;
-                        $thumb = imagecreatetruecolor($newwidth, $newheight);
-                        header('Content-type: image/jpeg');
+                                $im = imagecreatefromstring($data);
+                                $width = imagesx($im);
+                                $height = imagesy($im);
+                                $newwidth = $width * $percent;
+                                $newheight = $height * $percent;
+                                $thumb = imagecreatetruecolor($newwidth, $newheight);
+                                header('Content-type: image/jpeg');
 // Resize
-                        imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+                                imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
 // Output
 //                    imagejpeg($im, $uploads_dir . $imageName);
-                        imagejpeg($thumb, $uploads_dir . $imageName);
+                                imagejpeg($thumb, $uploads_dir . $imageName);
 
 //save record to database table
-                        $challenge = ChallengesVideos::findOne(["id" => $challenge->primaryKey]);
-                        $challenge->thumbnail = $imageName;
-                        if ($challenge->save()) {
-                            return "true";
+                                $challenge = ChallengesVideos::findOne(["id" => $challenge->primaryKey]);
+                                $challenge->thumbnail = $imageName;
+                                if ($challenge->save()) {
+                                    return "true";
+                                } else {
+                                    return $challenge->getErrors();
+                                }
+                                return "true";
+                            } else {
+                                return $challenge->getErrors();
+                            }
                         } else {
-                            return $challenge->getErrors();
+                            return "Video not saved";
                         }
-                        return "true";
                     } else {
-                        return $challenge->getErrors();
+                        return "streamer does not exist";
                     }
-                } else {
-                    return "Video not saved";
                 }
-            } else {
-                return "streamer does not exist";
+                return "post does not exist";
             }
-        } else {
-            return "post does not exist";
+            return 'missing params';
         }
+        return 'unauthorized 401!';
     }
 
     public function actionUpdateRoom() {
@@ -1070,34 +1079,40 @@ FROM users
     }
 
     public function actionGetProUserPosts() {
-
-        $post = Yii::$app->request->post();
-
-        $userId = $post["userId"];
-
-        $posts = ProUserPosts::find()
-                ->where(['user_id' => $userId])
-                ->andWhere('creation_date >= now() - INTERVAL 1 DAY')
-                ->orderBy('creation_date ASC')
-                ->asArray()
-                ->all();
-        return $posts;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId'])) {
+                $userId = $_POST["userId"];
+                $posts = ProUserPosts::find()
+                        ->where(['user_id' => $userId])
+                        ->andWhere('creation_date >= now() - INTERVAL 1 DAY')
+                        ->orderBy('creation_date ASC')
+                        ->asArray()
+                        ->all();
+                return ['success' => true, 'dataJsonArray' => $posts];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetOneProUserPost() {
-        $post = Yii::$app->request->post();
-
-        $postId = $post["proPostId"];
-
-        $posts = (new Query)
-                ->select("pro_user_posts.*,users.fullname,users.profile_picture")
-                ->from("pro_user_posts")
-                ->join('join', 'users', 'users.id = pro_user_posts.user_id')
-                ->where('creation_date >= now() - INTERVAL 1 DAY')
-                ->andWhere(["pro_user_posts.id" => $postId])
-                ->all();
-
-        return $posts;
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['proPostId'])) {
+                $postId = $_POST["proPostId"];
+                $posts = (new Query)
+                        ->select("pro_user_posts.*,users.fullname,users.profile_picture")
+                        ->from("pro_user_posts")
+                        ->join('join', 'users', 'users.id = pro_user_posts.user_id')
+                        ->where('creation_date >= now() - INTERVAL 1 DAY')
+                        ->andWhere(["pro_user_posts.id" => $postId])
+                        ->all();
+                return ['success' => true, 'dataJsonArray' => $posts];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetProUserPostsForProfile() {
@@ -1121,74 +1136,81 @@ FROM users
     }
 
     public function actionCreateProUserPost() {
-        $post = Yii::$app->request->post();
-        $userId = $post["userId"];
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            $post = Yii::$app->request->post();
+            $userId = $post["userId"];
 
-        $file_name = $_FILES['myFile']['name'];
-        $ext = pathinfo($file_name, PATHINFO_EXTENSION);
-        $temp_name = $_FILES['myFile']['tmp_name'];
-        $randomFileName = Yii::$app->security->generateRandomString() . "." . $ext;
-        $location = "proUserPost/";
-        if (move_uploaded_file($temp_name, $location . $randomFileName)) {
+            $file_name = $_FILES['myFile']['name'];
+            $ext = pathinfo($file_name, PATHINFO_EXTENSION);
+            $temp_name = $_FILES['myFile']['tmp_name'];
+            $randomFileName = Yii::$app->security->generateRandomString() . "." . $ext;
+            $location = "proUserPost/";
+            if (move_uploaded_file($temp_name, $location . $randomFileName)) {
 
-            $proUserPost = new ProUserPosts();
-            $proUserPost->video = $randomFileName;
-            $proUserPost->user_id = $userId;
-
-            if ($proUserPost->save()) {
-
-                $imageString = $post["imageString"];
-//for image
-                $location = "postPictures/";
-                $uploads_dir = $location;
-                $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
-                $percent = 1;
-
-                $data = base64_decode($imageString);
-
-                $im = imagecreatefromstring($data);
-                $width = imagesx($im);
-                $height = imagesy($im);
-                $newwidth = $width * $percent;
-                $newheight = $height * $percent;
-                $thumb = imagecreatetruecolor($newwidth, $newheight);
-                header('Content-type: image/jpeg');
-// Resize
-                imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
-// Output
-//                    imagejpeg($im, $uploads_dir . $imageName);
-                imagejpeg($thumb, $uploads_dir . $imageName);
-
-//save record to database table
-                $proUserPost = ProUserPosts::findOne(["id" => $proUserPost->primaryKey]);
-                $proUserPost->image = $imageName;
+                $proUserPost = new ProUserPosts();
+                $proUserPost->video = $randomFileName;
+                $proUserPost->user_id = $userId;
 
                 if ($proUserPost->save()) {
 
+                    $imageString = $post["imageString"];
+//for image
+                    $location = "postPictures/";
+                    $uploads_dir = $location;
+                    $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
+                    $percent = 1;
+
+                    $data = base64_decode($imageString);
+
+                    $im = imagecreatefromstring($data);
+                    $width = imagesx($im);
+                    $height = imagesy($im);
+                    $newwidth = $width * $percent;
+                    $newheight = $height * $percent;
+                    $thumb = imagecreatetruecolor($newwidth, $newheight);
+                    header('Content-type: image/jpeg');
+// Resize
+                    imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+// Output
+//                    imagejpeg($im, $uploads_dir . $imageName);
+                    imagejpeg($thumb, $uploads_dir . $imageName);
+
+//save record to database table
+                    $proUserPost = ProUserPosts::findOne(["id" => $proUserPost->primaryKey]);
+                    $proUserPost->image = $imageName;
+
+                    if ($proUserPost->save()) {
+
+                    }
+                    return "true";
+                } else {
+                    return $proUserPost->getErrors();
                 }
-                return "true";
-            } else {
-                return $proUserPost->getErrors();
             }
-        } else {
             return "not upload";
         }
+        return 'unauthorized 401!';
     }
 
     public function actionGetOneRoom() {
 
-        $post = Yii::$app->request->post();
-
-        $roomId = $post["roomId"];
-
-        $sql = "SELECT rooms.*, users.profile_picture
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['roomId'])) {
+                $roomId = $_POST["roomId"];
+                $sql = "SELECT rooms.*, users.profile_picture
         FROM rooms
          JOIN users ON rooms.r_admin = users.id
         WHERE rooms.id = $roomId;";
-        $command = Yii::$app->db->createCommand($sql);
-        $result = $command->queryOne();
+                $command = Yii::$app->db->createCommand($sql);
+                $result = $command->queryOne();
 
-        return $result;
+                return ['success' => true, 'data' => $result];
+            }
+            return ['success' => false, 'message' => 'missing params'];
+        }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetStreamers() {
@@ -1897,61 +1919,52 @@ FROM users
 
     public function actionUploadProfilePicture() {
 
-        $post = Yii::$app->request->post();
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId']) && isset($_POST['image'])) {
+                $userId = $_POST["userId"];
+                $image = $post["image"];
+                $user = Users::findOne(["id" => $userId]);
+                if ($user) {
 
-        $image = $post["image"];
-        $userId = $post["userId"];
+                    if (!file_exists(\Yii::getAlias('@webroot/profilePicture'))) {
+                        mkdir(\Yii::getAlias('@webroot/profilePicture'), 0777, true);
+                    }
+                    if ($image != "" && $image != null && $image) {
+                        $uploads_dir = \Yii::getAlias('@webroot/profilePicture/');
+                        $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
+                        $percent = 0.8;
 
-        $user = Users::findOne(["id" => $userId]);
-
-        if ($user) {
-
-            if (!file_exists(\Yii::getAlias('@webroot/profilePicture'))) {
-                mkdir(\Yii::getAlias('@webroot/profilePicture'), 0777, true);
-            }
-            if ($image != "" && $image != null && $image) {
-                $uploads_dir = \Yii::getAlias('@webroot/profilePicture/');
-                $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
-                $percent = 0.8;
-
-                $data = base64_decode($image);
-                $im = imagecreatefromstring($data);
-                $width = imagesx($im);
-                $height = imagesy($im);
-                $newwidth = $width * $percent;
-                $newheight = $height * $percent;
-                $thumb = imagecreatetruecolor($newwidth, $newheight);
+                        $data = base64_decode($image);
+                        $im = imagecreatefromstring($data);
+                        $width = imagesx($im);
+                        $height = imagesy($im);
+                        $newwidth = $width * $percent;
+                        $newheight = $height * $percent;
+                        $thumb = imagecreatetruecolor($newwidth, $newheight);
 
 //                            header('Content-type: image/jpeg');
 // Resize
-                imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+                        imagecopyresized($thumb, $im, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
 // Output
-                imagejpeg($thumb, $uploads_dir . $imageName);
-                if ($user->profile_picture && file_exists(\Yii::getAlias('@webroot/profilePicture/') . $user->profile_picture)) {
-                    unlink(\Yii::getAlias('@webroot/profilePicture/') . $user->profile_picture);
-                }
+                        imagejpeg($thumb, $uploads_dir . $imageName);
+                        if ($user->profile_picture && file_exists(\Yii::getAlias('@webroot/profilePicture/') . $user->profile_picture)) {
+                            unlink(\Yii::getAlias('@webroot/profilePicture/') . $user->profile_picture);
+                        }
 
-                $user->profile_picture = $imageName;
-                if ($user->save()) {
-                    return[
-                        'status' => "1",
-                        'message' => "success",
-                        'data' => $imageName
-                    ];
-                } else {
-                    return [
-                        "status" => "0",
-                        "message" => "error in uploading image",
-                    ];
+                        $user->profile_picture = $imageName;
+                        if ($user->save()) {
+                            return['success' => true, 'message' => $imageName];
+                        }
+                        return ['success' => false, "message" => "error in uploading image"];
+                    }
                 }
+                return ['success' => false, "message" => "no user found"];
             }
-        } else {
-            return [
-                "status" => "0",
-                "message" => "no user found",
-            ];
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionGetProfileData() {
@@ -2066,92 +2079,76 @@ FROM users
 
     public function actionHandlePurchase() {
 
-        $post = Yii::$app->request->post();
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId']) && isset($_POST['productId']) && isset($_POST['orderId']) && isset($_POST['packageName']) && isset($_POST['purchaseTime']) && isset($_POST['purchaseState']) && isset($_POST['purchaseToken']) && isset($_POST['quantity']) && isset($_POST['acknowledged'])) {
+                $userId = $_POST["userId"];
+                $productId = $_POST["productId"];
+                $orderId = $_POST["orderId"];
+                $packageName = $_POST["packageName"];
+                $purchaseTime = $_POST["purchaseTime"];
+                $purchaseState = $_POST["purchaseState"];
+                $purchaseToken = $_POST["purchaseToken"];
+                $quantity = $_POST["quantity"];
+                $acknowledged = $_POST["acknowledged"];
 
-        $userId = $post["userId"];
-        $productId = $post["productId"];
+                if ($productId == "remove_ads" || $productId == "elite" || $productId == "pro_user") {
+                    $userPurchace = new UserPurchaseDetails();
+                    $userPurchace->user_id = $userId;
+                    $userPurchace->orderId = $orderId;
+                    $userPurchace->packageName = $packageName;
+                    $userPurchace->productId = $productId;
+                    $userPurchace->purchaseTime = $purchaseTime;
+                    $userPurchace->purchaseState = $purchaseState;
+                    $userPurchace->purchaseToken = $purchaseToken;
+                    $userPurchace->quantity = $quantity;
+                    $userPurchace->acknowledged = $acknowledged;
+                    if ($userPurchace->save()) {
+                        return ["status" => "2", "message" => "Success"];
+                    }
+                    return ["status" => "0", "message" => "error in saving purchase",];
+                } else {
 
-        $orderId = $post["orderId"];
-        $packageName = $post["packageName"];
-        $purchaseTime = $post["purchaseTime"];
-        $purchaseState = $post["purchaseState"];
-        $purchaseToken = $post["purchaseToken"];
-        $quantity = $post["quantity"];
-        $acknowledged = $post["acknowledged"];
+                    $coinsToAdd = 0;
+                    if ($productId == "tlc_1200") {
+                        $coinsToAdd = 1200;
+                    } else if ($productId == "tlc_145") {
+                        $coinsToAdd = 145;
+                    } else if ($productId == "tlc_3000") {
+                        $coinsToAdd = 3000;
+                    } else if ($productId == "tlc_310") {
+                        $coinsToAdd = 310;
+                    } else if ($productId == "tlc_45") {
+                        $coinsToAdd = 45;
+                    } else if ($productId == "tlc_530") {
+                        $coinsToAdd = 530;
+                    } else if ($productId == "tlc_6400") {
+                        $coinsToAdd = 6400;
+                    } else {
+                        return ["status" => "0", "message" => "error in adding coins",];
+                    }
 
-        if ($productId == "remove_ads" || $productId == "elite" || $productId == "pro_user") {
-            $userPurchace = new UserPurchaseDetails();
-            $userPurchace->user_id = $userId;
-            $userPurchace->orderId = $orderId;
-            $userPurchace->packageName = $packageName;
-            $userPurchace->productId = $productId;
-            $userPurchace->purchaseTime = $purchaseTime;
-            $userPurchace->purchaseState = $purchaseState;
-            $userPurchace->purchaseToken = $purchaseToken;
-            $userPurchace->quantity = $quantity;
-            $userPurchace->acknowledged = $acknowledged;
-            if ($userPurchace->save()) {
-                return [
-                    "status" => "2",
-                    "message" => "Success",
-                ];
-            } else {
-                return [
-                    "status" => "0",
-                    "message" => "error in saving purchase",
-                ];
-            }
-        } else {
+                    $userModel = Users::findOne(["id" => $userId]);
+                    $oldCoins = $userModel->coins;
+                    $userModel->coins = $oldCoins + $coinsToAdd;
+                    if ($userModel->save()) {
+                        $userPurchace = new UserPurchaseDetails();
+                        $userPurchace->user_id = $userId;
+                        $userPurchace->orderId = $orderId;
+                        $userPurchace->packageName = $packageName;
+                        $userPurchace->productId = $productId;
+                        $userPurchace->purchaseTime = $purchaseTime;
+                        $userPurchace->purchaseState = $purchaseState;
+                        $userPurchace->purchaseToken = $purchaseToken;
+                        $userPurchace->quantity = $quantity;
+                        $userPurchace->acknowledged = $acknowledged;
+                        if ($userPurchace->save()) {
 
-            $coinsToAdd = 0;
-            if ($productId == "tlc_1200") {
-                $coinsToAdd = 1200;
-            } else if ($productId == "tlc_145") {
-                $coinsToAdd = 145;
-            } else if ($productId == "tlc_3000") {
-                $coinsToAdd = 3000;
-            } else if ($productId == "tlc_310") {
-                $coinsToAdd = 310;
-            } else if ($productId == "tlc_45") {
-                $coinsToAdd = 45;
-            } else if ($productId == "tlc_530") {
-                $coinsToAdd = 530;
-            } else if ($productId == "tlc_6400") {
-                $coinsToAdd = 6400;
-            } else {
-                return [
-                    "status" => "0",
-                    "message" => "error in adding coins",
-                ];
-            }
+                        }
+                        return ["status" => "1", "message" => "Success",];
+                    }
+                    return ["status" => "0", "message" => "error in adding coins",];
 
-            $userModel = Users::findOne(["id" => $userId]);
-            $oldCoins = $userModel->coins;
-            $userModel->coins = $oldCoins + $coinsToAdd;
-            if ($userModel->save()) {
-                $userPurchace = new UserPurchaseDetails();
-                $userPurchace->user_id = $userId;
-                $userPurchace->orderId = $orderId;
-                $userPurchace->packageName = $packageName;
-                $userPurchace->productId = $productId;
-                $userPurchace->purchaseTime = $purchaseTime;
-                $userPurchace->purchaseState = $purchaseState;
-                $userPurchace->purchaseToken = $purchaseToken;
-                $userPurchace->quantity = $quantity;
-                $userPurchace->acknowledged = $acknowledged;
-                if ($userPurchace->save()) {
-
-                }
-                return [
-                    "status" => "1",
-                    "message" => "Success",
-                ];
-            } else {
-                return [
-                    "status" => "0",
-                    "message" => "error in adding coins",
-                ];
-            }
 //            $addNotificationsRemaining = 0;
 //            $addNotificationsToAllUsersRemaining = 0;
 //            if ($productId == "30_notifications") {
@@ -2204,36 +2201,33 @@ FROM users
 //                    "message" => "error in saving notifications",
 //                ];
 //            }
+                }
+            }
+            return ['status' => '0', 'message' => 'missing params'];
         }
+        return ['status' => '0', 'message' => 'unauthorized 401!'];
     }
 
     public function actionChangePassword() {
 
-        $post = Yii::$app->request->post();
-
-        $username = $post["username"];
-        $password = $post["password"];
-
-        $user = Users::findOne(["username" => $username]);
-        if ($user) {
-            $user->password = $password;
-            if ($user->save()) {
-                return [
-                    "status" => "1",
-                    "message" => "Success",
-                ];
-            } else {
-                return [
-                    "status" => "0",
-                    "message" => "something went wrong when saving",
-                ];
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['username']) && isset($_POST["password"])) {
+                $username = $_POST["username"];
+                $password = $_POST["password"];
+                $user = Users::findOne(["username" => $username]);
+                if ($user) {
+                    $user->password = $password;
+                    if ($user->save()) {
+                        return ["success" => true, "message" => "Success",];
+                    }
+                    return ["success" => false, "message" => "something went wrong when saving",];
+                }
+                return ["success" => false, "message" => "user does not exist",];
             }
-        } else {
-            return [
-                "status" => "0",
-                "message" => "user does not exist",
-            ];
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
 //    public function actionTestUploadVideo() {
@@ -2258,153 +2252,117 @@ FROM users
 
     public function actionProPostViewed() {
 
-        $post = Yii::$app->request->post();
 
-        $userId = $post["userId"];
-        $proPostId = $post["proPostId"];
-
-        $model = new ProUserPostsViews();
-        $model->user_id = $userId;
-        $model->pro_post_id = $proPostId;
-        if ($model->save()) {
-            return [
-                "status" => "true",
-                "message" => "saved"
-            ];
-        } else {
-            return [
-                "status" => "true",
-                "message" => "already Saved"
-            ];
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['userId']) && isset($_POST['proPostId'])) {
+                $userId = $_POST["userId"];
+                $proPostId = $post["proPostId"];
+                $model = new ProUserPostsViews();
+                $model->user_id = $userId;
+                $model->pro_post_id = $proPostId;
+                if ($model->save()) {
+                    return ["success" => "true", "message" => "saved"];
+                }
+                return ["success" => "true", "message" => "already Saved"];
+            }
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionVoteForStreamer() {
-        $post = Yii::$app->request->post();
 
-        $postId = $post["postId"];
-        $streamerId = $post["streamerId"];
-        $voterId = $post["voterId"];
-
-        $room = Rooms::findOne(["id" => $postId]);
-        if ($room) {
-            $deadline = $room["challenge_date"];
-            $result = time() - strtotime($deadline);
-            if (!$deadline || $result > 0) {
-                return [
-                    'status' => true,
-                    'message' => 'voting period is finished',
-                    'data' => ''
-                ];
-            } else {
-                $voteTable = ChallengeVoting::findOne([
-                            "post_id" => $postId,
-                            "r_user" => $voterId
-                ]);
-                if ($voteTable) {
-                    return [
-                        'status' => true,
-                        'message' => 'you already voted',
-                        'data' => ''
-                    ];
-                } else {
-                    $vote = new ChallengeVoting();
-                    $vote->r_user = $voterId;
-                    $vote->post_id = $postId;
-                    $vote->r_streamer_voted = $streamerId;
-                    if ($vote->save()) {
-
-                        $user = Users::findOne(["id" => $voterId]);
-
-                        $senderName = "";
-                        if ($user) {
-                            $senderName = $user->fullname;
-                        }
-
-                        $myNotificationModel = new Notificaion();
-                        $myNotificationModel->room_id = $postId;
-                        $myNotificationModel->sender_id = $voterId;
-                        $myNotificationModel->reciever_id = $streamerId;
-                        $myNotificationModel->description = Constants::$VOTED_FOR_YOU;
-                        $myNotificationModel->save();
-
-                        $notification = new NotificationForm();
-                        $notification->subject = $senderName;
-                        $notification->message = Constants::$VOTED_FOR_YOU;
-                        $notification->notifyToUserGoToAd([$user->token], $postId);
-
-                        return [
-                            'status' => true,
-                            'message' => 'successfully voted',
-                            'data' => ''
-                        ];
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['postId']) && isset($_POST['streamerId']) && isset($_POST['voterId'])) {
+                $postId = $_POST["postId"];
+                $streamerId = $_POST["streamerId"];
+                $voterId = $_POST["voterId"];
+                $room = Rooms::findOne(["id" => $postId]);
+                if ($room) {
+                    $deadline = $room["challenge_date"];
+                    $result = time() - strtotime($deadline);
+                    if (!$deadline || $result > 0) {
+                        return ['success' => true, 'message' => 'voting period is finished', 'data' => ''];
                     } else {
-                        return [
-                            'status' => true,
-                            'message' => 'something went worng',
-                            'data' => ''
-                        ];
+                        $voteTable = ChallengeVoting::findOne([
+                                    "post_id" => $postId,
+                                    "r_user" => $voterId
+                        ]);
+                        if ($voteTable) {
+                            return ['success' => true, 'message' => 'you already voted', 'data' => ''];
+                        } else {
+                            $vote = new ChallengeVoting();
+                            $vote->r_user = $voterId;
+                            $vote->post_id = $postId;
+                            $vote->r_streamer_voted = $streamerId;
+                            if ($vote->save()) {
+
+                                $user = Users::findOne(["id" => $voterId]);
+
+                                $senderName = "";
+                                if ($user) {
+                                    $senderName = $user->fullname;
+                                }
+
+                                $myNotificationModel = new Notificaion();
+                                $myNotificationModel->room_id = $postId;
+                                $myNotificationModel->sender_id = $voterId;
+                                $myNotificationModel->reciever_id = $streamerId;
+                                $myNotificationModel->description = Constants::$VOTED_FOR_YOU;
+                                $myNotificationModel->save();
+
+                                $notification = new NotificationForm();
+                                $notification->subject = $senderName;
+                                $notification->message = Constants::$VOTED_FOR_YOU;
+                                $notification->notifyToUserGoToAd([$user->token], $postId);
+                                return ['success' => true, 'message' => 'successfully voted', 'data' => ''];
+                            }
+                            return ['success' => false, 'message' => 'something went worng', 'data' => ''];
+                        }
                     }
                 }
+                return ['success' => false, 'message' => 'post does not exist'];
             }
-        } else {
-            return [
-                'status' => true,
-                'message' => 'post does not exist',
-                'data' => ''
-            ];
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionAcceptInvitationToChallenge() {
-        $post = Yii::$app->request->post();
-
-        $postId = $post["postId"];
-        $streamerId = $post["streamerId"];
-
-        $room = Rooms::findOne(["id" => $postId]);
-        if ($room) {
-            if ($room["mention"] == $streamerId) {
-                $room->accept1 = 1;
-            } else if ($room["mention2"] == $streamerId) {
-                $room->accept2 = 1;
-            } else if ($room["mention3"] == $streamerId) {
-                $room->accept3 = 1;
-            } else {
-                return [
-                    'status' => true,
-                    'message' => 'streamer is not mentioned',
-                    'data' => ''
-                ];
+        $request = Yii::$app->request;
+        if ($request->get('access-token') != '--') {
+            if (isset($_POST['postId']) && isset($_POST["streamerId"])) {
+                $postId = $_POST["postId"];
+                $streamerId = $_POST["streamerId"];
+                $room = Rooms::findOne(["id" => $postId]);
+                if ($room) {
+                    if ($room["mention"] == $streamerId) {
+                        $room->accept1 = 1;
+                    } else if ($room["mention2"] == $streamerId) {
+                        $room->accept2 = 1;
+                    } else if ($room["mention3"] == $streamerId) {
+                        $room->accept3 = 1;
+                    } else {
+                        return ['success' => false, 'message' => 'streamer is not mentioned', 'data' => ''];
+                    }
+                    if ($room->save()) {
+                        $myNotificationModel = new Notificaion();
+                        $myNotificationModel->room_id = $room["id"];
+                        $myNotificationModel->sender_id = $streamerId;
+                        $myNotificationModel->reciever_id = $room["r_admin"];
+                        $myNotificationModel->description = Constants::$ACCEPTED_YOUR_CHALLENGE;
+                        $myNotificationModel->save();
+                        return ['success' => true, 'message' => 'challenge accepted', 'data' => ''];
+                    }
+                    return ['success' => false, 'message' => 'error accepting invitation',, 'data' => ''];
+                }
+                return ['success' => false, 'message' => 'post does not exist', 'data' => ''];
             }
-            if ($room->save()) {
-
-                $myNotificationModel = new Notificaion();
-                $myNotificationModel->room_id = $room["id"];
-                $myNotificationModel->sender_id = $streamerId;
-                $myNotificationModel->reciever_id = $room["r_admin"];
-                $myNotificationModel->description = Constants::$ACCEPTED_YOUR_CHALLENGE;
-                $myNotificationModel->save();
-
-                return [
-                    'status' => true,
-                    'message' => 'challenge accepted',
-                    'data' => ''
-                ];
-            } else {
-                return [
-                    'status' => true,
-                    'message' => 'error accepting invitation',
-                    'data' => ''
-                ];
-            }
-        } else {
-            return [
-                'status' => true,
-                'message' => 'post does not exist',
-                'data' => ''
-            ];
+            return ['success' => false, 'message' => 'missing params'];
         }
+        return ['success' => false, 'message' => 'unauthorized 401!'];
     }
 
     public function actionUpdateToken() {
