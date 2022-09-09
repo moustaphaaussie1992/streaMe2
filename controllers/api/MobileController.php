@@ -20,11 +20,10 @@ use app\models\StreamerGames;
 use app\models\UserNotifications;
 use app\models\UserPurchaseDetails;
 use app\models\Users;
-use app\models\UsersSpinSilver;
 use app\models\UserTransactions;
 use Yii;
 use yii\db\Query;
-use yii\web\Response;
+use yii\web\UnauthorizedHttpException;
 use function contains;
 use function GuzzleHttp\json_decode;
 
@@ -36,7 +35,7 @@ class MobileController extends ApiController {
         if ($request->get('access-token') != '--') {
             return ['success' => true, 'test' => 'Hello World!'];
         }
-        return ['success' => false, 'test' => 'Hello World!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetCoins() {
@@ -52,7 +51,7 @@ class MobileController extends ApiController {
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
 //    public function actionChallengeCheck() {
@@ -250,7 +249,7 @@ class MobileController extends ApiController {
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionCreateRoom() {
@@ -429,7 +428,7 @@ class MobileController extends ApiController {
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetChallengesVideos() {
@@ -621,7 +620,7 @@ class MobileController extends ApiController {
             }
             return 'missing params';
         }
-        return 'unauthorized 401!';
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionUpdateRoom() {
@@ -696,7 +695,7 @@ class MobileController extends ApiController {
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
 //     public function actionGetProUsersPosts() {
@@ -767,7 +766,7 @@ class MobileController extends ApiController {
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetRoomsByUser() {
@@ -792,7 +791,7 @@ class MobileController extends ApiController {
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetPostsBySearch() {
@@ -822,7 +821,7 @@ class MobileController extends ApiController {
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetUsersBySearch() {
@@ -847,7 +846,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetMyChallenges() {
@@ -917,7 +916,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetWinnedChallenges() {
@@ -940,7 +939,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionAcceptChallenge() {
@@ -1075,7 +1074,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetProUserPosts() {
@@ -1093,7 +1092,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetOneProUserPost() {
@@ -1112,7 +1111,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetProUserPostsForProfile() {
@@ -1132,7 +1131,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionCreateProUserPost() {
@@ -1190,7 +1189,7 @@ FROM users
             }
             return "not upload";
         }
-        return 'unauthorized 401!';
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetOneRoom() {
@@ -1210,7 +1209,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetStreamers() {
@@ -1417,7 +1416,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionFollow() {
@@ -1464,7 +1463,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
 //    public function actionSendNotificationMyUsers() {
@@ -1607,7 +1606,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionChecked() {
@@ -1644,7 +1643,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetAdminNameAndLink() {
@@ -1791,7 +1790,7 @@ FROM users
             }
             return ["success" => "false", "message" => "missing params"];
         }
-        return ['success' => false, 'message' => 'unathorized'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionFollowStreamer() {
@@ -1826,7 +1825,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
 //    public function actionSliverSpinReward() {
@@ -1900,7 +1899,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetNumberOfFollowers() {
@@ -1964,7 +1963,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetProfileData() {
@@ -1989,7 +1988,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetPostData() {
@@ -2062,7 +2061,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unathorized'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetGames() {
@@ -2074,7 +2073,7 @@ FROM users
                     ->all();
             return ['success' => true, 'dataJsonArray' => $games];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionHandlePurchase() {
@@ -2205,7 +2204,7 @@ FROM users
             }
             return ['status' => '0', 'message' => 'missing params'];
         }
-        return ['status' => '0', 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionChangePassword() {
@@ -2227,7 +2226,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
 //    public function actionTestUploadVideo() {
@@ -2268,7 +2267,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionVoteForStreamer() {
@@ -2327,7 +2326,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionAcceptInvitationToChallenge() {
@@ -2356,13 +2355,13 @@ FROM users
                         $myNotificationModel->save();
                         return ['success' => true, 'message' => 'challenge accepted', 'data' => ''];
                     }
-                    return ['success' => false, 'message' => 'error accepting invitation',, 'data' => ''];
+                    return ['success' => false, 'message' => 'error accepting invitation', 'data' => ''];
                 }
                 return ['success' => false, 'message' => 'post does not exist', 'data' => ''];
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionUpdateToken() {
@@ -2384,7 +2383,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
 //    public function actionSs() {
@@ -2457,7 +2456,7 @@ FROM users
             }
             return ['success' => false, 'message' => 'missing params'];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionGetUnreadNotificationNumber() {
@@ -2472,7 +2471,7 @@ FROM users
                     ->count();
             return ['success' => true, 'message' => $count];
         }
-        return ['success' => false, 'message' => 'unauthorized 401!'];
+        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
 //    public function actionMakeNotificationsRead() {
