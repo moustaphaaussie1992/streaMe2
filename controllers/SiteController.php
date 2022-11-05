@@ -179,10 +179,10 @@ WHERE roomId =" . $item["id"];
         ]);
         $userId = Yii::$app->user->id;
 
-        $user = Users::find()->where(['id' => $userId])->one();
+//        $user = Users::find()->where(['id' => $userId])->one();
 
         $userProfile = Users::find()
-                ->select("username,fullname,role,link_facebook,link_youtube,link_instagram,link_tiktok,profile_picture,address,email,phone,gender,coins,tags,bio")
+                ->select("id,username,fullname,role,link_facebook,link_youtube,link_instagram,link_tiktok,profile_picture,address,email,phone,gender,coins,tags,bio")
                 ->where(['id' => $userId])
                 ->asArray()
                 ->one();
@@ -197,7 +197,7 @@ WHERE roomId =" . $item["id"];
 //        \yii\helpers\VarDumper::dump($userProfile, 10, true);
 //
 //          $post = Yii::$app->request->post();
-     
+
         $countposts = Rooms::find()
                 ->where(['r_admin' => $userId])
                 ->all();
@@ -211,7 +211,7 @@ WHERE roomId =" . $item["id"];
 
         $userProfile["numberOfFollowers"] = sizeof($count);
 
-    
+
 
 
         $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
@@ -280,7 +280,8 @@ WHERE roomId =" . $item["id"];
                     'user' => $userProfile,
         ]);
     }
-       public function actionVisitProfile($userId) {
+
+    public function actionVisitProfile($userId) {
 //        die();
 
         $rooms = new ActiveDataProvider(['query' => Rooms::find(),
@@ -305,7 +306,7 @@ WHERE roomId =" . $item["id"];
                 ->all();
 
         $userProfile["userGame"] = $games;
-           $following = Follow::find()
+        $following = Follow::find()
                 ->where(['r_user' => $visitorId])
                 ->andWhere(['r_page' => $userId])
                 ->one();
@@ -317,7 +318,7 @@ WHERE roomId =" . $item["id"];
 //        \yii\helpers\VarDumper::dump($userProfile, 10, true);
 //
 //          $post = Yii::$app->request->post();
-     
+
         $countposts = Rooms::find()
                 ->where(['r_admin' => $userId])
                 ->all();
@@ -331,7 +332,7 @@ WHERE roomId =" . $item["id"];
 
         $userProfile["numberOfFollowers"] = sizeof($count);
 
-    
+
 
 
         $sql = "SELECT rooms.*, users.profile_picture,users.fullname,followrooms.r_room as room_id_liked,
@@ -394,14 +395,14 @@ WHERE roomId =" . $item["id"];
                 $arrayList[$i]["challengesVideos"] = null;
             }
         }
-    //        \yii\helpers\VarDumper::dump($userId,3,3);
-    //        \yii\helpers\VarDumper::dump($visitorId,3,3);
-    //        die();
+        //        \yii\helpers\VarDumper::dump($userId,3,3);
+        //        \yii\helpers\VarDumper::dump($visitorId,3,3);
+        //        die();
 
         return $this->render('profile', [
                     'rooms' => $arrayList,
                     'user' => $userProfile,
-            'following'=>$following,
+                    'following' => $following,
         ]);
     }
 

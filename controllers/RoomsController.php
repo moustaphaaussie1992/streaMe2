@@ -103,7 +103,6 @@ class RoomsController extends Controller {
      */
     public function actionCreate() {
         $model = new Rooms();
-
         if ($model->load(Yii::$app->request->post())) {
 
             $model->r_admin = \Yii::$app->getUser()->getId();

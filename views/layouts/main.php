@@ -88,7 +88,7 @@ echo ModalAjax::widget([
         Nav::widget([
             'options' => ['class' => 'navbar-nav pull-right'],
             'items' => [
-                '<a style="vertical-align: sub;" class="my-ajax" title="Create" href="/streame2/web/index.php?r=rooms/create"><svg xmlns="http://www.w3.org/2000/svg" width="41.144" height="41.144" viewBox="0 0 30 30">
+                '<a style="vertical-align: sub;" class="my-ajax" title="Create" href="' . \yii\helpers\Url::to(['rooms/create']) . '"><svg xmlns="http://www.w3.org/2000/svg" width="41.144" height="41.144" viewBox="0 0 30 30">
   <g id="noun_Plus_201304" transform="translate(-2 -2)">
     <g id="Group_42" data-name="Group 42" transform="translate(2 2)">
       <g id="Group_41" data-name="Group 41">
@@ -100,7 +100,8 @@ echo ModalAjax::widget([
 </svg>
 </a>'
                 ,
-                '<a href="/streame2/web/index.php">
+//                '<a href="/streame2/web/index.php">
+                '<a href="' . \yii\helpers\Url::to(['site/index']) . '">
                     <svg
 
 
@@ -123,7 +124,7 @@ echo ModalAjax::widget([
                     </g>
                     </svg>
                     </a>',
-                '<a href="/streame/web/index.php?r=site%2Flogin">
+                '<a href="' . \yii\helpers\Url::to(['site/login']) . '">
                     <svg
 
 
@@ -144,7 +145,9 @@ echo ModalAjax::widget([
                     </g>
                     </svg>
                     </a>',
-                '<a href="/streame2/web/index.php?r=site/profile">
+//                '<a href="/streame2/web/site/profile">
+                '<a href="' . \yii\helpers\Url::to(['site/profile']) . '">
+                    
                     <svg
                         style="
                         "
