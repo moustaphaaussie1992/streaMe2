@@ -2193,8 +2193,8 @@ FROM users
 
     public function actionChangePassword() {
 
-        $request = Yii::$app->request;
-        if ($request->get('access-token') != '--') {
+//        $request = Yii::$app->request;
+//        if ($request->get('access-token') != '--') {
             if (isset($_POST['username']) && isset($_POST["password"])) {
                 $username = $_POST["username"];
                 $password = $_POST["password"];
@@ -2209,8 +2209,8 @@ FROM users
                 return ["success" => false, "message" => "user does not exist",];
             }
             return ['success' => false, 'message' => 'missing params'];
-        }
-        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
+//        }
+//        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
 //    public function actionTestUploadVideo() {
