@@ -288,7 +288,7 @@ class MobileController extends ApiController {
                     $creatorUser = Users::findOne(["id" => $user]);
                     if ($creatorUser) {
                         if ($creatorUser->coins >= $coins) {
-
+                            
                         } else {
                             return ['success' => true, 'message' => 'nocoins'];
                         }
@@ -379,9 +379,7 @@ class MobileController extends ApiController {
                     $imagesSize = $post["imagesSize"];
                     $location = "postPictures/";
                     if ($room->save()) {
-                        for ($i = 0;
-                                $i < $imagesSize;
-                                $i++) {
+                        for ($i = 0; $i < $imagesSize; $i++) {
                             $image = $post["image" . ($i + 1)];
                             $uploads_dir = $location;
                             $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
@@ -668,9 +666,7 @@ class MobileController extends ApiController {
              ORDER BY rooms.creation_date DESC;";
                 $command = Yii::$app->db->createCommand($sql);
                 $arrayList = $command->queryAll();
-                for ($i = 0;
-                        $i < sizeof($arrayList);
-                        $i++) {
+                for ($i = 0; $i < sizeof($arrayList); $i++) {
                     $item = $arrayList[$i];
                     if ($item["category"] == "challenge") {
                         if ($item["accept1"] == 0 && $item["accept2"] == 0 && $item["accept3"] == 0) {
@@ -894,9 +890,7 @@ FROM users
 
                 $command = Yii::$app->db->createCommand($sql);
                 $arrayList = $command->queryAll();
-                for ($i = 0;
-                        $i < sizeof($arrayList);
-                        $i++) {
+                for ($i = 0; $i < sizeof($arrayList); $i++) {
                     $item = $arrayList[$i];
                     if ($item["category"] == "challenge") {
                         if ($item["accept1"] == 0 && $item["accept2"] == 0 && $item["accept3"] == 0) {
@@ -1055,9 +1049,7 @@ FROM users
 
                 $temp_array1 = [];
                 $temp_array2 = [];
-                for ($i = 0;
-                        $i < sizeof($posts);
-                        $i++) {
+                for ($i = 0; $i < sizeof($posts); $i++) {
                     $post = $posts[$i];
                     if ($post["count"] > $post["viewed_count"]) {
                         array_push($temp_array1, $post);
@@ -1065,9 +1057,7 @@ FROM users
                         array_push($temp_array2, $post);
                     }
                 }
-                for ($j = 0;
-                        $j < sizeof($temp_array2);
-                        $j++) {
+                for ($j = 0; $j < sizeof($temp_array2); $j++) {
                     array_push($temp_array1, $temp_array2[$j]);
                 }
                 return ['success' => true, 'dataJsonArray' => $posts];
@@ -1180,7 +1170,7 @@ FROM users
                     $proUserPost->image = $imageName;
 
                     if ($proUserPost->save()) {
-
+                        
                     }
                     return "true";
                 } else {
@@ -1265,16 +1255,14 @@ FROM users
         $user->link_tiktok = $linkTiktok;
 
         if ($user->save()) {
-            for ($i = 0;
-                    $i < sizeof($userGamesDecode);
-                    $i++) {
+            for ($i = 0; $i < sizeof($userGamesDecode); $i++) {
                 $userGame = $userGamesDecode[$i];
                 $model = new StreamerGames();
                 $model->user_id = $user->id;
                 $model->game_id = $userGame->id;
                 $model->game_account_id = $userGame->account_game_id;
                 if ($model->save()) {
-
+                    
                 }
             }
 
@@ -1394,9 +1382,7 @@ FROM users
                                 ->column();
                     }
 
-                    for ($i = 0;
-                            $i < sizeof($commentsUsersIds);
-                            $i++) {
+                    for ($i = 0; $i < sizeof($commentsUsersIds); $i++) {
                         if ($userId != $commentsUsersIds[$i]) {
                             $myNotificationModel = new Notificaion();
                             $myNotificationModel->room_id = $postId;
@@ -1737,9 +1723,7 @@ FROM users
                     $model->bio = $bio;
                     $model->tags = $tags;
                     if ($model->save()) {
-                        for ($i = 0;
-                                $i < sizeof($userGamesDecode);
-                                $i++) {
+                        for ($i = 0; $i < sizeof($userGamesDecode); $i++) {
                             $userGame = $userGamesDecode[$i];
                             if (isset($userGame->game_account_id)) {
                                 if (isset($userGame->streamerGameId)) {
@@ -2065,15 +2049,15 @@ FROM users
     }
 
     public function actionGetGames() {
-        $request = Yii::$app->request;
-        if ($request->get('access-token') != '--') {
-            $games = (new Query)
-                    ->select("*")
-                    ->from("games")
-                    ->all();
-            return ['success' => true, 'dataJsonArray' => $games];
-        }
-        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
+//        $request = Yii::$app->request;
+//        if ($request->get('access-token') != '--') {
+        $games = (new Query)
+                ->select("*")
+                ->from("games")
+                ->all();
+        return ['success' => true, 'dataJsonArray' => $games];
+//        }
+//        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
     public function actionHandlePurchase() {
@@ -2142,7 +2126,7 @@ FROM users
                         $userPurchace->quantity = $quantity;
                         $userPurchace->acknowledged = $acknowledged;
                         if ($userPurchace->save()) {
-
+                            
                         }
                         return ["status" => "1", "message" => "Success",];
                     }
