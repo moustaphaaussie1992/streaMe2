@@ -22,7 +22,7 @@ class ApiController extends Controller {
         $behaviors['authenticator'] = [
             'class' => QueryParamAuth::className(),
             'user' => \Yii::$app->get('user'),
-            'except' => ['login', 'signup','get-games','change-password']
+            'except' => ['login', 'signup','get-games']
         ];
         return $behaviors;
     }
