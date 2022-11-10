@@ -267,8 +267,8 @@ class MobileController extends ApiController {
                 $challengeTime = isset($_POST["challengeTime"]) ? $_POST["challengeTime"] : null;
                 $gameId = isset($_POST["game"]) ? $_POST["game"] : null;
 
-                $imageString = isset($post["imageString"]) ? $post["imageString"] : null;
-                $coins = isset($post["challengeCoins"]) ? $post["challengeCoins"] : null;
+                $imageString = isset($_POST["imageString"]) ? $_POST["imageString"] : null;
+                $coins = isset($_POST["challengeCoins"]) ? $_POST["challengeCoins"] : null;
 
                 $room = new Rooms();
                 $room->title = $title;
@@ -297,8 +297,8 @@ class MobileController extends ApiController {
                     }
                 }
                 if ($type == "text" || $category == "challenge") {
-                    $color1 = $post["color1"];
-                    $color2 = $post["color2"];
+                    $color1 = $_POST["color1"];
+                    $color2 = $_POST["color2"];
                     $room->color1 = $color1;
                     $room->color2 = $color2;
                     if ($color1 == null || $color2 == null || $color1 == "" || $color2 == "") {
@@ -318,7 +318,7 @@ class MobileController extends ApiController {
                             $creatorUser->save();
                             NotificationForm::notifyStreamersForChallenge($room);
                         }
-                        return ['success' => true, 'message' => 'nocoins'];
+                        return ['success' => true, 'message' => ''];
                     } else {
                         return ['success' => false, 'data' => $room->getErrors()];
                     }
@@ -374,13 +374,13 @@ class MobileController extends ApiController {
                         return "not upload";
                     }
                 } else if ($type == "pictures") {
-                    $color1 = $post["color1"];
-                    $color2 = $post["color2"];
-                    $imagesSize = $post["imagesSize"];
+                    $color1 = $_POST["color1"];
+                    $color2 = $_POST["color2"];
+                    $imagesSize = $_POST["imagesSize"];
                     $location = "postPictures/";
                     if ($room->save()) {
                         for ($i = 0; $i < $imagesSize; $i++) {
-                            $image = $post["image" . ($i + 1)];
+                            $image = $_POST["image" . ($i + 1)];
                             $uploads_dir = $location;
                             $imageName = Yii::$app->security->generateRandomString() . ".jpeg";
                             if ($image) {
@@ -552,9 +552,9 @@ class MobileController extends ApiController {
         $request = Yii::$app->request;
         if ($request->get('access-token') != '--') {
             if (isset($_POST['postId']) && isset($_POST['streamerId']) && isset($_POST['imageString'])) {
-                $postId = $post["postId"];
-                $streamerId = $post["streamerId"];
-                $imageString = $post["imageString"];
+                $postId = $_POST["postId"];
+                $streamerId = $_POST["streamerId"];
+                $imageString = $_POST["imageString"];
 
                 $file_name = $_FILES['myFile']['name'];
                 $ext = pathinfo($file_name, PATHINFO_EXTENSION);
@@ -2055,7 +2055,8 @@ FROM users
                 ->select("*")
                 ->from("games")
                 ->all();
-        return ['success' => true, 'dataJsonArray' => $games];
+		return $games;
+//        return ['success' => true, 'dataJsonArray' => $games];
 //        }
 //        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
