@@ -1243,11 +1243,11 @@ FROM users
 //        $user->link = $link;
         $user->role = $role;
 
-        if ($role . contains(1)) {
-            $user->is_approved = 0;
-        } else {
-            $user->is_approved = 1;
-        }
+//        if ($role.contains(1)) {
+//            $user->is_approved = 0;
+//        } else {
+        $user->is_approved = 1;
+//        }
 
         $user->link_facebook = $linkFacebook;
         $user->link_youtube = $linkYoutube;
@@ -1632,18 +1632,18 @@ FROM users
         throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
 
-    public function actionGetAdminNameAndLink() {
-        $userId = Yii::$app->request->post();
-        $userId = $userId["id"];
-
-        $user = Pageadmin::find()
-                ->where(['id' => $userId])
-                ->one();
-        if ($user)
-            return $user;
-        else
-            return false;
-    }
+//    public function actionGetAdminNameAndLink() {
+//        $userId = Yii::$app->request->post();
+//        $userId = $userId["id"];
+//
+//        $user = Pageadmin::find()
+//                ->where(['id' => $userId])
+//                ->one();
+//        if ($user)
+//            return $user;
+//        else
+//            return false;
+//    }
 
     public function actionRemoveRoomById() {
         $post = Yii::$app->request->post();
@@ -2055,7 +2055,7 @@ FROM users
                 ->select("*")
                 ->from("games")
                 ->all();
-		return $games;
+        return $games;
 //        return ['success' => true, 'dataJsonArray' => $games];
 //        }
 //        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
@@ -2196,20 +2196,20 @@ FROM users
 
 //        $request = Yii::$app->request;
 //        if ($request->get('access-token') != '--') {
-            if (isset($_POST['username']) && isset($_POST["password"])) {
-                $username = $_POST["username"];
-                $password = $_POST["password"];
-                $user = Users::findOne(["username" => $username]);
-                if ($user) {
-                    $user->password = $password;
-                    if ($user->save()) {
-                        return ["success" => true, "message" => "Success",];
-                    }
-                    return ["success" => false, "message" => "something went wrong when saving",];
+        if (isset($_POST['username']) && isset($_POST["password"])) {
+            $username = $_POST["username"];
+            $password = $_POST["password"];
+            $user = Users::findOne(["username" => $username]);
+            if ($user) {
+                $user->password = $password;
+                if ($user->save()) {
+                    return ["success" => true, "message" => "Success",];
                 }
-                return ["success" => false, "message" => "user does not exist",];
+                return ["success" => false, "message" => "something went wrong when saving",];
             }
-            return ['success' => false, 'message' => 'missing params'];
+            return ["success" => false, "message" => "user does not exist",];
+        }
+        return ['success' => false, 'message' => 'missing params'];
 //        }
 //        throw new UnauthorizedHttpException("Your request was made with invalid credentials.");
     }
